@@ -276,7 +276,7 @@ def main():
             data = f.read().splitlines()
             data = list(chunk(data, batch_size))
 
-    sample_path = os.path.join(outpath, "samples")
+    sample_path = os.path.join(outpath, "samples", opt.prompt.replace(" ", "_"), f"guide_w{opt.scale - 1.0}")
     os.makedirs(sample_path, exist_ok=True)
     base_count = len(os.listdir(sample_path))
     grid_count = len(os.listdir(outpath)) - 1

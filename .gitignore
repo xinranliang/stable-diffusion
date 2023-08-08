@@ -1,0 +1,4 @@
+*.egg-info
+*.ckpt
+*logs
+*__pycache__*
