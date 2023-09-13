@@ -2,3 +2,5 @@
 *.ckpt
 *logs
 *__pycache__*
+*slurm_output*
+*.png
