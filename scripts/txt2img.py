@@ -279,7 +279,8 @@ def main():
     job_name = opt.prompt.split(" ")[-1].replace(".", "")
     sample_path = os.path.join(outpath, "samples", f"guide_w{opt.scale - 1.0}", job_name)
     os.makedirs(sample_path, exist_ok=True)
-    base_count = len(os.listdir(sample_path))
+    # base_count = len(os.listdir(sample_path))
+    base_count = 0 # sllow overwrite
     grid_count = len(os.listdir(outpath)) - 1
 
     start_code = None

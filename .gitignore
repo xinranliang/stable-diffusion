@@ -4,3 +4,4 @@
 *__pycache__*
 *slurm_output*
 *.png
+*.ipynb_checkpoints*

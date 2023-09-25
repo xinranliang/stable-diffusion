@@ -7,19 +7,19 @@ train_list = ['Actor', 'Architect', 'Audiologist', 'Author', 'Baker', 'Barber', 
 test_list = ['Accountant', 'Astronaut', 'Biologist', 'Carpenter', 'Civil Engineer', 'Clerk', 'Detective', 'Editor', 'Firefighter', 'Interpreter', 'Manager', 'Nutritionist', 'Paramedic', 'Pharmacist', 'Physicist', 'Pilot', 'Reporter', 'Security Guard', 'Scientist', 'Web Developer']
 
 # guidance values
-w_lst = [3.0, 5.0, 7.0, 9.0, 11.0, 13.0, 15.0]
+w_lst = [1.0, 5.0, 9.0, 13.0, 17.0]
 
 def get_job_prompt(job_name):
-    return "A person of a {}.".format(job_name.lower())
+    return "A single {} in the center.".format(job_name.lower())
 
 
 def guidance_sample():
     sys_comm = [
         "python", "scripts/txt2img.py", 
-        "--outdir", "./logs", "--ddim_steps", "250", "--ddim_eta", "1.0", "--ckpt", "models/ldm/stable-diffusion-v1/sd-v1-4.ckpt",
-        "--n_samples", "5", "--n_iter", "1", "--seed", "112233"
+        "--outdir", "./logs", "--ddim_steps", "250", "--ddim_eta", "1.0", "--ckpt", "models/ldm/stable-diffusion-v1/sd-v1-4.ckpt", "--skip_grid",
+        "--n_samples", "5", "--n_iter", "1"
     ] 
-    for job_name in test_list:
+    for job_name in train_list + test_list:
         input_prompt = get_job_prompt(job_name)
         curr_sys_comm = sys_comm + ["--prompt", input_prompt]
         for w in w_lst:
