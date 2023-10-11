@@ -10,11 +10,14 @@ train_list = ['Actor', 'Architect', 'Audiologist', 'Author', 'Baker', 'Barber', 
 # 20 test split occupations
 test_list = ['Accountant', 'Astronaut', 'Biologist', 'Carpenter', 'Civil Engineer', 'Clerk', 'Detective', 'Editor', 'Firefighter', 'Interpreter', 'Manager', 'Nutritionist', 'Paramedic', 'Pharmacist', 'Physicist', 'Pilot', 'Reporter', 'Security Guard', 'Scientist', 'Web Developer']
 
+# 44 occupations
+social_job_list = ["administrative assistant", "electrician", "author", "optician", "announcer", "chemist", "butcher", "building inspector", "bartender", "childcare worker", "chef", "CEO", "biologist", "bus driver", "crane operator", "drafter", "construction worker", "doctor", "custodian", "cook", "nurse practitioner", "mail carrier", "lab tech", "pharmacist", "librarian", "nurse", "housekeeper", "pilot", "roofer", "police officer", "PR person", "customer service representative", "software developer", "special ed teacher", "receptionist", "plumber", "security guard", "technical writer", "telemarketer", "veterinarian"]
+
 # guidance values
-w_lst = [1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.0, 15.0, 17.0, 19.0, 21.0, 23.0]
+w_lst = [1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.0]
 
 def get_job_prompt(job_name):
-    return "A photo of a single {} standing in the center.".format(job_name.lower())
+    return "A photo of a single {} in the center.".format(job_name.lower())
 
 
 def guidance_sample():
@@ -31,8 +34,11 @@ def guidance_sample():
             subprocess.run(temp_sys_comm)
 
 
-def guidance_sample_loadmodel(batch_size, num_divide, current_divide):
-    prompt_list = [get_job_prompt(job_name) for job_name in train_list] + [get_job_prompt(job_name) for job_name in test_list]
+def guidance_sample_loadmodel(batch_size, num_divide, current_divide, date, curr_batch):
+    if date == "2023-09-13":
+        prompt_list = [get_job_prompt(job_name) for job_name in train_list] + [get_job_prompt(job_name) for job_name in test_list]
+    else:
+        prompt_list = [get_job_prompt(job_name) for job_name in social_job_list]
 
     unit_divide = len(prompt_list) // num_divide
     prompt_list = prompt_list[unit_divide * current_divide : unit_divide * (current_divide + 1)]
@@ -50,7 +56,7 @@ def guidance_sample_loadmodel(batch_size, num_divide, current_divide):
             for curr_idx in range(len(prompt_list)):
                 curr_prompt = prompt_list[curr_idx]
                 curr_job_name = curr_prompt.split(" ")[5]
-                sample_path = os.path.join("./logs/samples", f"guide_w{w - 1.0}", curr_job_name)
+                sample_path = os.path.join(f"./logs/samples/{date}", f"guide_w{w - 1.0}/{curr_job_name}/run{curr_batch}")
                 os.makedirs(sample_path, exist_ok=True)
                 
                 image_lst[curr_idx].save(os.path.join(sample_path, "{:02d}.png".format(bs_idx)))
@@ -63,8 +69,10 @@ if __name__ == "__main__":
     parser.add_argument("--num-batch", type=int, help="to sample from first or second half of job list")
     parser.add_argument("--curr-batch", type=int, help="to sample from first or second half of job list")
     parser.add_argument("--batch-size", type=int, help="number of samples from each prompt")
+    parser.add_argument("--curr-run", type=int, help="value of current run, e.g. num_runs x batch_size = num_samples")
+    parser.add_argument("--date", type=str, help="date of experiments")
 
     opt = parser.parse_args()
 
-    guidance_sample_loadmodel(batch_size = opt.batch_size, num_divide = opt.num_batch, current_divide = opt.curr_batch)
+    guidance_sample_loadmodel(batch_size = opt.batch_size, num_divide = opt.num_batch, current_divide = opt.curr_batch, date=opt.date, curr_batch=opt.curr_run)
     

@@ -1,0 +1,1 @@
+python domain_classifier/inception_score.py --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-09-13

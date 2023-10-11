@@ -18,7 +18,7 @@ DOMAINS = (
 
 root_path = "/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples"
 
-w_lst = [0.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0]
+w_lst = [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0]
 
 
 class TxtImg_Gender(datasets.ImageFolder):
@@ -71,7 +71,7 @@ def main():
     for cfg_w in w_lst:
         return_dict = clip_predict(batch_size=128, cfg_w=cfg_w)
         print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
-        print("portion of predicted female: {:03f}".format(return_dict["num_female"] / 1000))
+        print("portion of predicted female: {:03f}".format(return_dict["num_female"] / 20000))
 
 
 if __name__ == "__main__":
