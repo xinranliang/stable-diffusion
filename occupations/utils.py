@@ -55,7 +55,7 @@ def guidance_sample_loadmodel(batch_size, num_divide, current_divide, date, curr
 
             for curr_idx in range(len(prompt_list)):
                 curr_prompt = prompt_list[curr_idx]
-                curr_job_name = curr_prompt.split(" ")[5]
+                curr_job_name = curr_prompt.lower().replace(" ", "_")
                 sample_path = os.path.join(f"./logs/samples/{date}", f"guide_w{w - 1.0}/{curr_job_name}/run{curr_batch}")
                 os.makedirs(sample_path, exist_ok=True)
                 

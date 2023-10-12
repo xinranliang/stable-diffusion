@@ -13,44 +13,10 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision.models.inception import inception_v3
 from torchvision import datasets, transforms
 
+from utils import SimpleDataset
+
 # guidance values
 w_lst = [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0]
-
-
-class SimpleDataset(Dataset):
-    """An simple image dataset for calculating inception score and FID."""
-
-    def __init__(self, root, exts=['png', 'jpg', 'JPEG'], transform=None, num_images=None):
-        """Construct an image dataset.
-
-        Args:
-            root: Path to the image directory. This directory will be
-                  recursively searched.
-            exts: List of extensions to search for.
-            transform: A torchvision transform to apply to the images. If
-                       None, the images will be converted to tensors.
-            num_images: The number of images to load. If None, all images
-                        will be loaded.
-        """
-        self.paths = []
-        self.transform = transform
-        for ext in exts:
-            self.paths.extend(
-                list(glob(
-                    os.path.join(root, '**/*.%s' % ext), recursive=True)))
-        self.paths = self.paths[:num_images]
-
-    def __len__(self):              # noqa
-        return len(self.paths)
-
-    def __getitem__(self, idx):     # noqa
-        image = Image.open(self.paths[idx])
-        image = image.convert('RGB')        # fix ImageNet grayscale images
-        if self.transform is not None:
-            image = self.transform(image)
-        else:
-            image = transforms.ToTensor(image)
-        return image
 
 
 def inception_score(folder, cuda=True, batch_size=64, resize=True, splits=5):

@@ -10,13 +10,12 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Dataset
 
 import clip 
+from utils import SimpleDataset
 
 DOMAINS = (
     "woman",
     "man"
 )
-
-root_path = "/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples"
 
 w_lst = [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0]
 
@@ -33,18 +32,19 @@ class TxtImg_Gender(datasets.ImageFolder):
         super().__init__(root, transform, target_transform)
 
 
-def clip_predict(batch_size, cfg_w):
+def clip_predict(batch_size, cfg_w, img_dir, sub_name):
     # Load the model
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model, preprocess = clip.load('ViT-B/32', device)
 
     # prepare data
-    txtimg_gen_dataset = TxtImg_Gender(root = root_path, transform = preprocess, target_transform = None, cfg_w = cfg_w)
+    root_path = f"{img_dir}/guide_w{cfg_w}"
+    txtimg_gen_dataset = SimpleDataset(root = root_path, subset = sub_name, transform = preprocess)
     txtimg_gen_dataloader = DataLoader(txtimg_gen_dataset, batch_size = batch_size, shuffle=False, num_workers=4)
     domain_text = torch.cat([clip.tokenize(f"a photo of a {domain}") for domain in DOMAINS]) # num_labels x token_length
 
     pred_labels = []
-    for image, class_label in iter(txtimg_gen_dataloader):
+    for image in iter(txtimg_gen_dataloader):
         # Calculate features
         with torch.no_grad():
             # discrete domain classification
@@ -61,17 +61,26 @@ def clip_predict(batch_size, cfg_w):
             # similarity = (image_features @ text_features.T)
     
     pred_labels = np.concatenate(pred_labels)
-    num_female = sum(pred_labels == 0)
-    num_male = sum(pred_labels == 1)
+    num_female = sum(pred_labels == 0) / len(pred_labels)
+    num_male = sum(pred_labels == 1) / len(pred_labels)
 
     return {"num_male": num_male, "num_female": num_female}
 
 
 def main():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--master-folder", type=str, help="path to master folder, not including cfg_w")
+    parser.add_argument("--subset-name", type=str, help="string name of a subset to evaluate")
+
+    opt = parser.parse_args()
+
     for cfg_w in w_lst:
-        return_dict = clip_predict(batch_size=128, cfg_w=cfg_w)
+        return_dict = clip_predict(batch_size=128, cfg_w=cfg_w, img_dir=opt.master_folder, sub_name=opt.subset_name)
         print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
-        print("portion of predicted female: {:03f}".format(return_dict["num_female"] / 20000))
+        if opt.sub_name is not None:
+            print(f"text prompt: {opt.subset_name}")
+        print("portion of predicted female: {:03f}".format(return_dict["num_female"]))
 
 
 if __name__ == "__main__":
