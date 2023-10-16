@@ -10,6 +10,12 @@ import torchvision
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Dataset
 
+# 44 occupations
+social_job_list = ["administrative assistant", "electrician", "author", "optician", "announcer", "chemist", "butcher", "building inspector", "bartender", "childcare worker", "chef", "CEO", "biologist", "bus driver", "crane operator", "drafter", "construction worker", "doctor", "custodian", "cook", "nurse practitioner", "mail carrier", "lab tech", "pharmacist", "librarian", "nurse", "housekeeper", "pilot", "roofer", "police officer", "PR person", "customer service representative", "software developer", "special ed teacher", "receptionist", "plumber", "security guard", "technical writer", "telemarketer", "veterinarian"]
+
+def get_job_prompt(job_name):
+    return "A photo of a single {} in the center.".format(job_name.lower())
+
 
 class SimpleDataset(Dataset):
     """An simple image dataset for calculating inception score and FID."""
@@ -31,7 +37,8 @@ class SimpleDataset(Dataset):
         self.paths = []
         self.transform = transform
         if subset is not None:
-            root = os.path.join(root, subset)
+            subset_dir = get_job_prompt(subset).lower().replace(" ", "_")
+            root = os.path.join(root, subset_dir)
         for ext in exts:
             self.paths.extend(
                 list(glob(

@@ -3,6 +3,7 @@ from glob import glob
 from PIL import Image
 import argparse
 import os 
+import subprocess
 
 import torch
 from torch import nn
@@ -13,7 +14,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision.models.inception import inception_v3
 from torchvision import datasets, transforms
 
-from utils import SimpleDataset
+from utils import SimpleDataset, social_job_list, get_job_prompt
 
 # guidance values
 w_lst = [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0]
@@ -35,7 +36,7 @@ def inception_score(folder, cuda=True, batch_size=64, resize=True, splits=5):
         dtype = torch.FloatTensor
 
     # Set up dataloader
-    dataloader = DataLoader(dataset, batch_size=batch_size)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     # Load inception model
     inception_model = inception_v3(pretrained=True, transform_input=False).type(dtype)
@@ -87,6 +88,19 @@ def inception_score(folder, cuda=True, batch_size=64, resize=True, splits=5):
     return inception_score, std
 
 
+def run_script(folder):
+    for job_name in social_job_list:
+        job_dir = get_job_prompt(job_name).lower().replace(" ", "_")
+        print(f"input text prompt: {job_name}")
+        for cfg_w in w_lst:
+            print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
+            sys_comm = [
+                "fidelity", "--gpu", "0", "--isc", "--samples-find-deep",
+                "--input1", f"{folder}/guide_w{cfg_w}/{job_dir}",
+            ]
+            subprocess.run(sys_comm)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
@@ -94,8 +108,10 @@ if __name__ == "__main__":
 
     opt = parser.parse_args()
 
-    for cfg_w in w_lst:
+    """for cfg_w in w_lst:
         master_folder = os.path.join(opt.master_folder, f"guide_w{cfg_w}")
         print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
         is_mean, is_std = inception_score(master_folder)
-        print(f"inception score: mean {is_mean} +- std {is_std}")
+        print(f"inception score: mean {is_mean} +- std {is_std}")"""
+    
+    run_script(opt.master_folder)

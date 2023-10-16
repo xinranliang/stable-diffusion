@@ -10,7 +10,7 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Dataset
 
 import clip 
-from utils import SimpleDataset
+from utils import SimpleDataset, social_job_list, get_job_prompt
 
 DOMAINS = (
     "woman",
@@ -63,6 +63,7 @@ def clip_predict(batch_size, cfg_w, img_dir, sub_name):
     pred_labels = np.concatenate(pred_labels)
     num_female = sum(pred_labels == 0) / len(pred_labels)
     num_male = sum(pred_labels == 1) / len(pred_labels)
+    print(f"total number of samples: {len(pred_labels)}")
 
     return {"num_male": num_male, "num_female": num_female}
 
@@ -78,9 +79,20 @@ def main():
     for cfg_w in w_lst:
         return_dict = clip_predict(batch_size=128, cfg_w=cfg_w, img_dir=opt.master_folder, sub_name=opt.subset_name)
         print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
-        if opt.sub_name is not None:
+
+        # overall or specify a subset
+        if opt.subset_name is not None:
             print(f"text prompt: {opt.subset_name}")
         print("portion of predicted female: {:03f}".format(return_dict["num_female"]))
+
+    # go over each one
+    for job_name in social_job_list:
+        print(f"text prompt: {job_name}")
+        full_results = []
+        for cfg_w in w_lst:
+            return_dict = clip_predict(batch_size=128, cfg_w=cfg_w, img_dir=opt.master_folder, sub_name=job_name)
+            full_results.append(return_dict["num_female"])
+        print(f"portion of predicted female: {full_results}")
 
 
 if __name__ == "__main__":

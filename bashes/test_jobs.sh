@@ -6,11 +6,11 @@
 #SBATCH --cpus-per-task=4     # Specify the number of CPUs your task will need.
 #SBATCH --gres=gpu:rtx_3090:1          # the number of GPUs requested
 #SBATCH --mem=24G             # memory 
-#SBATCH --output=/n/fs/xl-diffbia/projects/stable-diffusion/slurm_output/2023-10-11/sample_jobs_batch1_run9.txt            # where stdout and stderr will write to
+#SBATCH --output=/n/fs/xl-diffbia/projects/stable-diffusion/slurm_output/2023-10-12/sample_jobs_batch1_run9.txt            # where stdout and stderr will write to
 #SBATCH -t 12:00:00           # time requested in hour:minute:second
 
 source ~/.bashrc
 conda activate latent-diffusion
 cd /n/fs/xl-diffbia/projects/stable-diffusion
 
-CUDA_VISIBLE_DEVICES=0 python occupations/utils.py --date 2023-10-11 --batch-size 50 --num-batch 2 --curr-batch 1 --curr-run 9
+CUDA_VISIBLE_DEVICES=0 python occupations/utils.py --date 2023-10-12 --batch-size 50 --num-batch 2 --curr-batch 1 --curr-run 9

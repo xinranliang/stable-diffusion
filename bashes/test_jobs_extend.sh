@@ -1,0 +1,20 @@
+#!/bin/sh
+
+#SBATCH --account=visualai    # Specify VisualAI
+#SBATCH --nodes=1             # nodes requested
+#SBATCH --ntasks=1            # tasks requested
+#SBATCH --cpus-per-task=4     # Specify the number of CPUs your task will need.
+#SBATCH --gres=gpu:rtx_3090:1          # the number of GPUs requested
+#SBATCH --mem=24G             # memory 
+#SBATCH --output=/n/fs/xl-diffbia/projects/stable-diffusion/slurm_output/2023-10-15/sample_jobs_extend_batch4.txt            # where stdout and stderr will write to
+#SBATCH -t 24:00:00           # time requested in hour:minute:second
+
+source ~/.bashrc
+conda activate latent-diffusion
+cd /n/fs/xl-diffbia/projects/stable-diffusion
+
+CUDA_VISIBLE_DEVICES=0 python occupations/utils.py --date 2023-10-15 --batch-size 100 --num-batch 4 --curr-batch 4 --curr-run 0
+CUDA_VISIBLE_DEVICES=0 python occupations/utils.py --date 2023-10-15 --batch-size 100 --num-batch 4 --curr-batch 4 --curr-run 1
+CUDA_VISIBLE_DEVICES=0 python occupations/utils.py --date 2023-10-15 --batch-size 100 --num-batch 4 --curr-batch 4 --curr-run 2
+CUDA_VISIBLE_DEVICES=0 python occupations/utils.py --date 2023-10-15 --batch-size 100 --num-batch 4 --curr-batch 4 --curr-run 3
+CUDA_VISIBLE_DEVICES=0 python occupations/utils.py --date 2023-10-15 --batch-size 100 --num-batch 4 --curr-batch 4 --curr-run 4

@@ -16,8 +16,12 @@ social_job_list = ["administrative assistant", "electrician", "author", "opticia
 # guidance values
 w_lst = [1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.0]
 
-def get_job_prompt(job_name):
-    return "A photo of a single {} in the center.".format(job_name.lower())
+def get_job_prompt(job_name, gender_label=None):
+    if gender_label is None:
+        return "A photo of a single {} in the center.".format(job_name.lower())
+    else:
+        assert gender_label == "male" or gender_label == "female", "unspecified gender label"
+        return "A photo of a single {} {} in the center.".format(gender_label, job_name.lower())
 
 
 def guidance_sample():
@@ -35,10 +39,12 @@ def guidance_sample():
 
 
 def guidance_sample_loadmodel(batch_size, num_divide, current_divide, date, curr_batch):
-    if date == "2023-09-13":
+    if date == "2023-09-13": # 100 jobs
         prompt_list = [get_job_prompt(job_name) for job_name in train_list] + [get_job_prompt(job_name) for job_name in test_list]
-    else:
+    elif date == "2023-10-12": # 40 jobs, gender-agnostic
         prompt_list = [get_job_prompt(job_name) for job_name in social_job_list]
+    elif date == "2023-10-15": # 40 jobs, extended prompts
+        prompt_list = [get_job_prompt(job_name, "male") for job_name in social_job_list] + [get_job_prompt(job_name, "female") for job_name in social_job_list]
 
     unit_divide = len(prompt_list) // num_divide
     prompt_list = prompt_list[unit_divide * current_divide : unit_divide * (current_divide + 1)]
