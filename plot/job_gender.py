@@ -4,7 +4,7 @@ import argparse
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 
-def plot_job_gender_special(correct):
+def plot_repr_special(correct):
     ws = np.array([2.0, 4.0, 6.0, 8.0, 10.0, 12.0], dtype=np.float64)
     job_names = ["author", "lab tech", "pharmacist",  "public relations person", "veterinarian"]
     colors = ["blue", "orange", "green", "purple", "brown"]
@@ -19,13 +19,17 @@ def plot_job_gender_special(correct):
     ]
     base_counts = np.array([0.376, 0.392, 0.33, 0.482, 0.452, 0.456], dtype=np.float64) # cfg_w = 0.0
     if correct:
-        coeff_lower = np.array([0.389, 0.672, 0.955, 0.711, 0.692, 0.674], dtype=np.float64)
-        coeff_upper = np.array([1.056, 1.096, 1.136, 1.079, 1.116, 1.152], dtype=np.float64)
+        true_repr = np.array([25, 29, 46, 36, 38, 41], dtype=np.float64) / 100
+        pred_repr = np.array([36, 36, 46, 38, 40, 48], dtype=np.float64) / 100
+        unsure_repr = np.array([23, 14, 7, 13, 10, 17], dtype=np.float64) / 100
+
+        coeff_lower = pred_repr - (true_repr - unsure_repr / 2)
+        coeff_upper = (true_repr + unsure_repr / 2) - pred_repr
     
     cfgw_counts_lower, cfgw_counts_upper = [], []
     for idx in range(len(cfgw_counts)):
-        cfgw_counts_lower.append(cfgw_counts[idx] * coeff_lower)
-        cfgw_counts_upper.append(cfgw_counts[idx] * coeff_upper)
+        cfgw_counts_lower.append(cfgw_counts[idx] - coeff_lower)
+        cfgw_counts_upper.append(cfgw_counts[idx] + coeff_upper)
 
     plt.figure(figsize=(8, 8/1.6))
     with plt.style.context('ggplot'):
@@ -34,7 +38,7 @@ def plot_job_gender_special(correct):
         plt.axhline(base_counts[0], linestyle="--", color="black")
         for idx in range(len(job_names)):
             plt.plot(ws, cfgw_counts[idx + 1], linestyle="-", marker='o', label=job_names[idx], color=colors[idx])
-            plt.fill_between(ws, cfgw_counts_upper[idx + 1], cfgw_counts_lower[idx + 1], alpha=0.1, color=colors[idx])
+            plt.fill_between(ws, cfgw_counts_upper[idx + 1], cfgw_counts_lower[idx + 1], alpha=0.2, color=colors[idx])
             plt.axhline(base_counts[idx + 1], linestyle="--", color=colors[idx])
         plt.xticks(ws, ws)
         plt.ylim(0.1, 1.01)
@@ -42,14 +46,14 @@ def plot_job_gender_special(correct):
         plt.xlabel("Scale of classifier-free guidance ($w$)")
         plt.ylabel("Portion classified as Female samples")
         plt.title("Sampling distribution w.r.t Guidance from stable-diffusion-v2")
-        plt.legend(ncols=3, loc="lower center")
+        plt.legend(ncols=3)
     
     plt.savefig("/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-12/figures/sb-v2-job-gender.png", dpi=300, bbox_inches="tight")
     plt.savefig("/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-12/figures/sb-v2-job-gender.pdf", dpi=300, bbox_inches="tight")
     plt.close()
 
 
-def plot_job_gender_common(correct):
+def plot_repr_common(correct):
     ws = np.array([2.0, 4.0, 6.0, 8.0, 10.0, 12.0], dtype=np.float64)
     job_names = ["childcare worker", "nurse", "CSR", "doctor", "technical writer", "software developer"]
     colors = ["blue", "orange", "green", "purple", "brown", "red"]
@@ -64,13 +68,17 @@ def plot_job_gender_common(correct):
     ]
     base_counts = np.array([0.716, 0.672, 0.528, 0.346, 0.38, 0.218], dtype=np.float64) # cfg_w = 0.0
     if correct:
-        coeff_lower = np.array([0.389, 0.672, 0.955, 0.711, 0.692, 0.674], dtype=np.float64)
-        coeff_upper = np.array([1.056, 1.096, 1.136, 1.079, 1.116, 1.152], dtype=np.float64)
+        true_repr = np.array([25, 29, 46, 36, 38, 41], dtype=np.float64) / 100
+        pred_repr = np.array([36, 36, 46, 38, 40, 48], dtype=np.float64) / 100
+        unsure_repr = np.array([23, 14, 7, 13, 10, 17], dtype=np.float64) / 100
+
+        coeff_lower = pred_repr - (true_repr - unsure_repr / 2)
+        coeff_upper = (true_repr + unsure_repr / 2) - pred_repr
     
     cfgw_counts_lower, cfgw_counts_upper = [], []
     for idx in range(len(cfgw_counts)):
-        cfgw_counts_lower.append(cfgw_counts[idx] * coeff_lower)
-        cfgw_counts_upper.append(cfgw_counts[idx] * coeff_upper)
+        cfgw_counts_lower.append(cfgw_counts[idx] - coeff_lower)
+        cfgw_counts_upper.append(cfgw_counts[idx] + coeff_upper)
 
     plt.figure(figsize=(8, 8/1.6))
     with plt.style.context('ggplot'):
@@ -91,7 +99,103 @@ def plot_job_gender_common(correct):
     plt.close()
 
 
+def acc_repr_level():
+    ws = np.array([2.0, 4.0, 6.0, 8.0, 10.0, 12.0], dtype=np.float64)
+    true_repr = np.array([25, 29, 46, 36, 38, 41], dtype=np.float64) / 100
+    pred_repr = np.array([36, 36, 46, 38, 40, 48], dtype=np.float64) / 100
+    unsure_repr = np.array([23, 14, 7, 13, 10, 17], dtype=np.float64) / 100
+
+    plt.figure(figsize=(8, 6))
+    with plt.style.context('ggplot'):
+        plt.plot(ws, pred_repr, linestyle="-", color="red", label="CLIP auto pred")
+        plt.plot(ws, true_repr + unsure_repr / 2, linestyle="--", color="red", label="human anno lower/upper")
+        plt.plot(ws, true_repr - unsure_repr / 2, linestyle="--", color="red")
+        plt.fill_between(ws, true_repr + unsure_repr / 2, true_repr - unsure_repr / 2, alpha=0.2)
+
+        plt.xticks(ws, ws)
+        plt.ylim(0, 1.01)
+        plt.yticks(np.arange(0, 1.01, step=0.05))
+        plt.xlabel("Scale of classifier-free guidance ($w$)")
+        plt.ylabel("Empirical predicted v.s. annotated Female representation")
+        plt.title("Automatic CLIP classifier w.r.t Guidance")
+        plt.legend()
+    
+    plt.savefig("/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-12/figures/acc_repr_level.png", dpi=300, bbox_inches="tight")
+    plt.savefig("/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-12/figures/acc_repr_level.pdf", dpi=300, bbox_inches="tight")
+    plt.close()
+
+
+def plot_is(job_name):
+    ws = np.array([2.0, 4.0, 6.0, 8.0, 10.0, 12.0], dtype=np.float64)
+
+    if job_name == "author":
+        is_male_mean = np.array([4.690, 4.094, 4.104, 4.032, 3.980, 4.078], dtype=np.float64)
+        is_male_std = np.array([0.326, 0.435, 0.300, 0.252, 0.259, 0.281], dtype=np.float64)
+        is_female_mean = np.array([5.242, 4.724, 4.471, 4.628, 4.470, 4.211], dtype=np.float64)
+        is_female_std = np.array([0.482, 0.229, 0.287, 0.314, 0.262, 0.166], dtype=np.float64)
+        female_repr = 0.392
+        male_repr = 1 - female_repr
+    elif job_name == "lab tech":
+        is_male_mean = np.array([2.813, 1.849, 1.614, 1.620, 1.552, 1.565], dtype=np.float64)
+        is_male_std = np.array([0.202, 0.126, 0.083, 0.140, 0.126, 0.113], dtype=np.float64)
+        is_female_mean = np.array([2.308, 1.810, 1.648, 1.461, 1.515, 1.468], dtype=np.float64)
+        is_female_std = np.array([0.248, 0.131, 0.175, 0.173, 0.066, 0.030], dtype=np.float64)
+        female_repr = 0.33
+        male_repr = 1 - female_repr
+    elif job_name == "pharmacist":
+        is_male_mean = np.array([2.444, 2.204, 2.054, 1.975, 1.947, 1.933], dtype=np.float64)
+        is_male_std = np.array([0.055, 0.091, 0.110, 0.072, 0.117, 0.140], dtype=np.float64)
+        is_female_mean = np.array([2.359, 2.367, 2.116, 1.916, 1.904, 1.815], dtype=np.float64)
+        is_female_std = np.array([0.099, 0.074, 0.045, 0.078, 0.054, 0.068], dtype=np.float64)
+        female_repr = 0.482
+        male_repr = 1 - female_repr
+    elif job_name == "veterinarian":
+        is_male_mean = np.array([6.294, 5.561, 4.747, 4.378, 3.908, 4.042], dtype=np.float64)
+        is_male_std = np.array([0.292, 0.129, 0.348, 0.351, 0.103, 0.315], dtype=np.float64)
+        is_female_mean = np.array([7.071, 5.450, 4.544, 4.302, 3.935, 3.716], dtype=np.float64)
+        is_female_std = np.array([0.419, 0.584, 0.230, 0.100, 0.227, 0.352], dtype=np.float64)
+        female_repr = 0.456
+        male_repr = 1 - female_repr
+    elif job_name == "librarian":
+        is_male_mean = np.array([6.294, 5.561, 4.747, 4.378, 3.908, 4.042], dtype=np.float64)
+        is_male_std = np.array([0.292, 0.129, 0.348, 0.351, 0.103, 0.315], dtype=np.float64)
+        is_female_mean = np.array([7.071, 5.450, 4.544, 4.302, 3.935, 3.716], dtype=np.float64)
+        is_female_std = np.array([0.419, 0.584, 0.230, 0.100, 0.227, 0.352], dtype=np.float64)
+        female_repr = 0.456
+        male_repr = 1 - female_repr
+    
+    plt.figure(figsize=(8, 8/1.6))
+    fig, ax1 = plt.subplots()
+    ax2 = ax1.twinx()
+    with plt.style.context('ggplot'):
+        lns1 = ax1.plot(ws, is_male_mean, linestyle="-", marker='o', label="male IS", color="red")
+        ax1.fill_between(ws, is_male_mean + is_male_std, is_male_mean - is_male_std, alpha=0.2, color="red")
+        lns2 = ax1.plot(ws, is_female_mean, linestyle="-", marker='o', label="female IS", color="blue")
+        ax1.fill_between(ws, is_female_mean + is_female_std, is_female_mean - is_female_std, alpha=0.2, color="blue")
+        lns3 = ax2.axhline(male_repr, linestyle="--", label="male repr", color="red")
+        lns4 = ax2.axhline(female_repr, linestyle="--", label="female repr", color="blue")
+
+        ax1.set_xticks(ws, ws)
+        ax1.set_xlabel("Scale of classifier-free guidance ($w$)")
+        ax1.set_ylabel("IS")
+        ax2.set_ylabel("percent")
+        plt.title(f"Inception Score (IS) and Representation w.r.t Guidance for {job_name}")
+
+        ax1.legend(loc="upper left")
+        ax2.legend(loc="upper right")
+    
+    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-15/figures/is_{job_name.replace(" ", "_")}.png", dpi=300, bbox_inches="tight")
+    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-15/figures/is_{job_name.replace(" ", "_")}.pdf", dpi=300, bbox_inches="tight")
+    plt.close()
+
+
 if __name__ == "__main__":
-    os.makedirs("/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-12/figures", exist_ok=True)
-    # plot_job_gender_special(correct=True)
-    plot_job_gender_common(correct=True)
+    os.makedirs("/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-15/figures", exist_ok=True)
+    # plot_repr_special(correct=True)
+    # plot_repr_common(correct=True)
+    # acc_repr_level()
+
+    special_jobs = ["author", "librarian", "pharmacist", "lab tech", "public relations person", "veterinarian"]
+    for name in special_jobs:
+        plot_is(name)
+    common_jobs = []

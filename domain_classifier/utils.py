@@ -13,8 +13,12 @@ from torch.utils.data import DataLoader, Dataset
 # 44 occupations
 social_job_list = ["administrative assistant", "electrician", "author", "optician", "announcer", "chemist", "butcher", "building inspector", "bartender", "childcare worker", "chef", "CEO", "biologist", "bus driver", "crane operator", "drafter", "construction worker", "doctor", "custodian", "cook", "nurse practitioner", "mail carrier", "lab tech", "pharmacist", "librarian", "nurse", "housekeeper", "pilot", "roofer", "police officer", "PR person", "customer service representative", "software developer", "special ed teacher", "receptionist", "plumber", "security guard", "technical writer", "telemarketer", "veterinarian"]
 
-def get_job_prompt(job_name):
-    return "A photo of a single {} in the center.".format(job_name.lower())
+def get_job_prompt(job_name, gender_label=None):
+    if gender_label is None:
+        return "A photo of a single {} in the center.".format(job_name.lower())
+    else:
+        assert gender_label == "male" or gender_label == "female", "unspecified gender label"
+        return "A photo of a single {} {} in the center.".format(gender_label, job_name.lower())
 
 
 class SimpleDataset(Dataset):

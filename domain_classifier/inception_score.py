@@ -88,23 +88,69 @@ def inception_score(folder, cuda=True, batch_size=64, resize=True, splits=5):
     return inception_score, std
 
 
-def run_script(folder):
-    for job_name in social_job_list:
-        job_dir = get_job_prompt(job_name).lower().replace(" ", "_")
-        print(f"input text prompt: {job_name}")
-        for cfg_w in w_lst:
-            print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
-            sys_comm = [
-                "fidelity", "--gpu", "0", "--isc", "--samples-find-deep",
-                "--input1", f"{folder}/guide_w{cfg_w}/{job_dir}",
-            ]
-            subprocess.run(sys_comm)
+def run_script(folder, prompt_label, gender_label):
+    if not gender_label:
+        if prompt_label:
+            for job_name in social_job_list:
+                job_dir = get_job_prompt(job_name).lower().replace(" ", "_")
+                subprocess.run(["echo", f"input text prompt: {job_dir}"])
+                # print(f"input text prompt: {job_dir}")
+                for cfg_w in w_lst:
+                    subprocess.run(["echo", f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}"])
+                    # print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
+                    sys_comm = [
+                        "fidelity", "--gpu", "0", "--isc", "--samples-find-deep", "--silent",
+                        "--input1", f"{folder}/guide_w{cfg_w}/{job_dir}",
+                        "--isc-splits", "5", "-b", "100"
+                    ]
+                    subprocess.run(sys_comm)
+        
+        else:
+            for cfg_w in w_lst:
+                subprocess.run(["echo", f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}"])
+                # print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
+                sys_comm = [
+                    "fidelity", "--gpu", "0", "--isc", "--samples-find-deep", "--silent",
+                    "--input1", f"{folder}/guide_w{cfg_w}",
+                    "--isc-splits", "5"
+                ]
+                subprocess.run(sys_comm)
+    
+    else:
+        if prompt_label:
+            for job_name in social_job_list:
+                for gender_name in ["male", "female"]:
+                    job_dir = get_job_prompt(job_name, gender_name).lower().replace(" ", "_")
+                    subprocess.run(["echo", f"input text prompt: {job_dir}"])
+                    # print(f"input text prompt: {job_dir}")
+                    for cfg_w in w_lst:
+                        subprocess.run(["echo", f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}"])
+                        # print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
+                        sys_comm = [
+                            "fidelity", "--gpu", "0", "--isc", "--samples-find-deep", "--silent",
+                            "--input1", f"{folder}/guide_w{cfg_w}/{job_dir}",
+                            "--isc-splits", "1", "-b", "500"
+                        ]
+                        subprocess.run(sys_comm)
+        
+        else:
+            for cfg_w in w_lst:
+                subprocess.run(["echo", f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}"])
+                # print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
+                sys_comm = [
+                    "fidelity", "--gpu", "0", "--isc", "--samples-find-deep", "--silent",
+                    "--input1", f"{folder}/guide_w{cfg_w}",
+                    "--isc-splits", "5"
+                ]
+                subprocess.run(sys_comm)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--master-folder", type=str, help="path to master folder, not including cfg_w")
+    parser.add_argument("--per-job", action="store_true", help="whether to evaluate entire sample sets or decompose by jobs")
+    parser.add_argument("--extend-gender", action="store_true", help="whether to evaluate on sub-group level with extended prompt")
 
     opt = parser.parse_args()
 
@@ -114,4 +160,4 @@ if __name__ == "__main__":
         is_mean, is_std = inception_score(master_folder)
         print(f"inception score: mean {is_mean} +- std {is_std}")"""
     
-    run_script(opt.master_folder)
+    run_script(opt.master_folder, opt.per_job, opt.extend_gender)
