@@ -125,10 +125,36 @@ def acc_repr_level():
     plt.close()
 
 
-def plot_is(job_name):
+def plot_is(job_name=None):
     ws = np.array([2.0, 4.0, 6.0, 8.0, 10.0, 12.0], dtype=np.float64)
 
-    if job_name == "author":
+    if job_name is None:
+        ws = np.array([0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0], dtype=np.float64)
+        is_mean = np.array([12.558, 15.170, 15.829, 15.806, 15.777, 15.122, 15.262], dtype=np.float64)
+        is_std = np.array([0.135, 0.261, 0.361, 0.300, 0.195, 0.254, 0.221], dtype=np.float64)
+        is_mean_ext = np.array([11.857, 14.597, 14.748, 14.376, 13.784, 13.282, 12.956], dtype=np.float64)
+        is_std_ext = np.array([0.101, 0.115, 0.210, 0.111, 0.095, 0.093, 0.204], dtype=np.float64)
+
+        plt.figure(figsize=(8, 8/1.6))
+        with plt.style.context('ggplot'):
+            plt.plot(ws, is_mean, linestyle="-", marker='o', label="IS w/o extended prompt", color="red")
+            plt.fill_between(ws, is_mean + is_std, is_mean - is_std, alpha=0.2, color="red")
+            plt.plot(ws, is_mean_ext, linestyle="-", marker='o', label="IS w/ extended prompt", color="blue")
+            plt.fill_between(ws, is_mean_ext + is_std_ext, is_mean_ext - is_std_ext, alpha=0.2, color="blue")
+
+            plt.xticks(ws, ws)
+            plt.xlabel("Scale of classifier-free guidance ($w$)")
+            plt.ylabel(r"IS value $\uparrow$")
+            plt.title(f"Inception Score (IS) w.r.t Guidance")
+            plt.legend()
+        
+        plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-15/figures/is_overall.png", dpi=300, bbox_inches="tight")
+        plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-15/figures/is_overall.pdf", dpi=300, bbox_inches="tight")
+        plt.close()
+
+        return
+
+    elif job_name == "author":
         is_male_mean = np.array([4.690, 4.094, 4.104, 4.032, 3.980, 4.078], dtype=np.float64)
         is_male_std = np.array([0.326, 0.435, 0.300, 0.252, 0.259, 0.281], dtype=np.float64)
         is_female_mean = np.array([5.242, 4.724, 4.471, 4.628, 4.470, 4.211], dtype=np.float64)
@@ -163,6 +189,20 @@ def plot_is(job_name):
         is_female_std = np.array([0.419, 0.584, 0.230, 0.100, 0.227, 0.352], dtype=np.float64)
         female_repr = 0.456
         male_repr = 1 - female_repr
+    elif job_name == "software developer":
+        is_male_mean = np.array([4.446, 3.382, 2.915, 2.832, 2.660, 2.564], dtype=np.float64)
+        is_male_std = np.array([0.255, 0.391, 0.274, 0.213, 0.136, 0.098], dtype=np.float64)
+        is_female_mean = np.array([3.648, 2.694, 2.456, 2.252, 2.220, 2.006], dtype=np.float64)
+        is_female_std = np.array([0.149, 0.086, 0.074, 0.077, 0.064, 0.114], dtype=np.float64)
+        female_repr = 0.218
+        male_repr = 1 - female_repr
+    elif job_name == "customer service representative":
+        is_male_mean = np.array([5.473, 4.372, 4.138, 3.938, 4.041, 3.542], dtype=np.float64)
+        is_male_std = np.array([0.558, 0.072, 0.215, 0.473, 0.313, 0.125], dtype=np.float64)
+        is_female_mean = np.array([0.558, 0.072, 0.215, 0.473, 0.313, 0.125], dtype=np.float64)
+        is_female_std = np.array([0.313, 0.385, 0.243, 0.354, 0.227, 0.220], dtype=np.float64)
+        female_repr = 0.528
+        male_repr = 1 - female_repr
     
     plt.figure(figsize=(8, 8/1.6))
     fig, ax1 = plt.subplots()
@@ -177,15 +217,16 @@ def plot_is(job_name):
 
         ax1.set_xticks(ws, ws)
         ax1.set_xlabel("Scale of classifier-free guidance ($w$)")
-        ax1.set_ylabel("IS")
+        ax1.set_ylabel(r"IS value $\uparrow$")
         ax2.set_ylabel("percent")
         plt.title(f"Inception Score (IS) and Representation w.r.t Guidance for {job_name}")
 
         ax1.legend(loc="upper left")
         ax2.legend(loc="upper right")
     
-    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-15/figures/is_{job_name.replace(" ", "_")}.png", dpi=300, bbox_inches="tight")
-    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-15/figures/is_{job_name.replace(" ", "_")}.pdf", dpi=300, bbox_inches="tight")
+    job_name_title = job_name.replace(" ", "_")
+    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-15/figures/is_{job_name_title}.png", dpi=300, bbox_inches="tight")
+    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-15/figures/is_{job_name_title}.pdf", dpi=300, bbox_inches="tight")
     plt.close()
 
 
@@ -195,7 +236,10 @@ if __name__ == "__main__":
     # plot_repr_common(correct=True)
     # acc_repr_level()
 
-    special_jobs = ["author", "librarian", "pharmacist", "lab tech", "public relations person", "veterinarian"]
+    plot_is()
+    special_jobs = ["author", "librarian", "pharmacist", "lab tech", "veterinarian", "librarian"]
     for name in special_jobs:
         plot_is(name)
-    common_jobs = []
+    common_jobs = ["software developer", "customer service representative"]
+    for name in common_jobs:
+        plot_is(name)

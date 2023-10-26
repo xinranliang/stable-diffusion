@@ -1,0 +1,62 @@
+import argparse
+import os
+from glob import glob
+from PIL import Image
+import numpy as np
+
+import torch
+import torch.nn as nn 
+import torchvision
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader, Dataset
+
+# 44 occupations
+social_job_list = ["administrative assistant", "electrician", "author", "optician", "announcer", "chemist", "butcher", "building inspector", "bartender", "childcare worker", "chef", "CEO", "biologist", "bus driver", "crane operator", "drafter", "construction worker", "doctor", "custodian", "cook", "nurse practitioner", "mail carrier", "lab tech", "pharmacist", "librarian", "nurse", "housekeeper", "pilot", "roofer", "police officer", "PR person", "customer service representative", "software developer", "special ed teacher", "receptionist", "plumber", "security guard", "technical writer", "telemarketer", "veterinarian"]
+
+def get_job_prompt(job_name, gender_label=None):
+    if gender_label is None:
+        return "A photo of a single {} in the center.".format(job_name.lower())
+    else:
+        assert gender_label == "male" or gender_label == "female", "unspecified gender label"
+        return "A photo of a single {} {} in the center.".format(gender_label, job_name.lower())
+
+
+class SimpleDataset(Dataset):
+    """An simple image dataset for calculating inception score and FID."""
+
+    def __init__(self, root, subset=None, exts=['png', 'jpg', 'JPEG'], transform=None, num_images=None):
+        """Construct an image dataset.
+
+        Args:
+            root: Path to the image directory. This directory will be
+                  recursively searched.
+            subset: String name of subset samples directory. 
+                    This directory will be recursively searched.
+            exts: List of extensions to search for.
+            transform: A torchvision transform to apply to the images. If
+                       None, the images will be converted to tensors.
+            num_images: The number of images to load. If None, all images
+                        will be loaded.
+        """
+        self.paths = []
+        if transform is not None:
+            self.transform = transform
+        else:
+            self.transform = transforms.ToTensor()
+        if subset is not None:
+            subset_dir = get_job_prompt(subset).lower().replace(" ", "_")
+            root = os.path.join(root, subset_dir)
+        for ext in exts:
+            self.paths.extend(
+                list(glob(
+                    os.path.join(root, '**/*.%s' % ext), recursive=True)))
+        self.paths = self.paths[:num_images]
+
+    def __len__(self):              # noqa
+        return len(self.paths)
+
+    def __getitem__(self, idx):     # noqa
+        image = Image.open(self.paths[idx])
+        image = image.convert('RGB')        # fix ImageNet grayscale images
+        image = self.transform(image)
+        return image, self.paths[idx]

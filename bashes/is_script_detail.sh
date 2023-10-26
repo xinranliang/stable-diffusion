@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=4     # Specify the number of CPUs your task will need.
 #SBATCH --gres=gpu:rtx_3090:1          # the number of GPUs requested
 #SBATCH --mem=24G             # memory 
-#SBATCH --output=/n/fs/xl-diffbia/projects/stable-diffusion/slurm_output/2023-10-15/eval_jobs_is_detail_batch.txt            # where stdout and stderr will write to
+#SBATCH --output=/n/fs/xl-diffbia/projects/stable-diffusion/slurm_output/2023-10-15/eval_jobs_is_detail.txt            # where stdout and stderr will write to
 #SBATCH -t 4:00:00           # time requested in hour:minute:second
 
 source ~/.bashrc
