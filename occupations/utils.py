@@ -18,10 +18,10 @@ w_lst = [1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.0]
 
 def get_job_prompt(job_name, gender_label=None):
     if gender_label is None:
-        return "A portrait of a single {}.".format(job_name.lower())
+        return "A photo of a single {}.".format(job_name.lower())
     else:
         assert gender_label == "male" or gender_label == "female", "unspecified gender label"
-        return "A portrait of a single {} {}.".format(gender_label, job_name.lower())
+        return "A photo of a single {} {}.".format(gender_label, job_name.lower())
 
 
 def guidance_sample():
@@ -41,9 +41,9 @@ def guidance_sample():
 def guidance_sample_loadmodel(batch_size, num_divide, current_divide, date, curr_batch):
     if date == "2023-09-13": # 100 jobs
         prompt_list = [get_job_prompt(job_name) for job_name in train_list] + [get_job_prompt(job_name) for job_name in test_list]
-    elif date == "2023-10-24": # 40 jobs, gender-agnostic
+    elif date == "2023-10-26": # 40 jobs, gender-agnostic
         prompt_list = [get_job_prompt(job_name) for job_name in social_job_list]
-    elif date == "2023-10-25": # 40 jobs, extended prompts
+    elif date == "2023-10-27": # 40 jobs, extended prompts
         prompt_list = [get_job_prompt(job_name, "male") for job_name in social_job_list] + [get_job_prompt(job_name, "female") for job_name in social_job_list]
 
     unit_divide = len(prompt_list) // num_divide
@@ -57,7 +57,8 @@ def guidance_sample_loadmodel(batch_size, num_divide, current_divide, date, curr
 
     for bs_idx in range(batch_size):
         for w in w_lst:
-            image_lst = pipe(prompt_list, guidance_scale=w).images
+            with torch.autocast("cuda"):
+                image_lst = pipe(prompt_list, guidance_scale=w).images
 
             for curr_idx in range(len(prompt_list)):
                 curr_prompt = prompt_list[curr_idx]

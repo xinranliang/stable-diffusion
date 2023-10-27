@@ -230,16 +230,55 @@ def plot_is(job_name=None):
     plt.close()
 
 
+def plot_box_area(ratio, job_name=None):
+    ws = np.array([2.0, 4.0, 6.0, 8.0, 10.0, 12.0], dtype=np.float64)
+
+    if job_name is None:
+        ws = np.array([0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0], dtype=np.float64)
+        if ratio:
+            box_area = np.array([48540.142, 68357.158, 76789.037, 81876.793, 84748.730, 86698.360, 89210.068], dtype=np.float64) / (512 * 512)
+        else:
+            box_area = np.array([48540.142, 68357.158, 76789.037, 81876.793, 84748.730, 86698.360, 89210.068], dtype=np.float64) / 10**4
+
+        plt.figure(figsize=(8, 8/1.6))
+        with plt.style.context('ggplot'):
+            plt.plot(ws, box_area, linestyle="-", marker='o')
+
+            plt.xticks(ws, ws)
+            plt.xlabel("Scale of classifier-free guidance ($w$)")
+            if ratio:
+                plt.ylim(0.0, 1.01)
+                plt.yticks(np.arange(0.0, 1.01, step=0.1))
+                plt.ylabel(r"Percent of Bounding Box Area on Image")
+            else:
+                plt.ylim(4.0, 10.01)
+                plt.yticks(np.arange(4.0, 10.01, step=1.0))
+                plt.ylabel(r"Detected Bounding Box Area ($\times 10^4$)")
+            plt.title(f"Box Area of Detected Human w.r.t Guidance on stable-diffusion-v2")
+        
+        if ratio:
+            plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-12/figures/sbv2_box_area_overall_ratio.png", dpi=300, bbox_inches="tight")
+            plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-12/figures/sbv2_box_area_overall_ratio.pdf", dpi=300, bbox_inches="tight")
+        else:
+            plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-12/figures/sbv2_box_area_overall_value.png", dpi=300, bbox_inches="tight")
+            plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-12/figures/sbv2_box_area_overall_value.pdf", dpi=300, bbox_inches="tight")
+        plt.close()
+
+        return
+
+
 if __name__ == "__main__":
     os.makedirs("/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-15/figures", exist_ok=True)
     # plot_repr_special(correct=True)
     # plot_repr_common(correct=True)
     # acc_repr_level()
 
-    plot_is()
-    special_jobs = ["author", "librarian", "pharmacist", "lab tech", "veterinarian", "librarian"]
-    for name in special_jobs:
-        plot_is(name)
-    common_jobs = ["software developer", "customer service representative"]
-    for name in common_jobs:
-        plot_is(name)
+    # plot_is()
+    # special_jobs = ["author", "librarian", "pharmacist", "lab tech", "veterinarian", "librarian"]
+    # for name in special_jobs:
+        # plot_is(name)
+    # common_jobs = ["software developer", "customer service representative"]
+    # for name in common_jobs:
+        # plot_is(name)
+    plot_box_area(ratio=True)
+    plot_box_area(ratio=False)

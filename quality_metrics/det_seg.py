@@ -28,26 +28,30 @@ def compute_area(image, predictor):
     pred_labels = outputs["instances"].pred_classes
 
     if len(pred_labels) > 0 and torch.min(pred_labels) == 0:
-        correct_boxes = []
-        num_total_boxes, num_total_labels = len(outputs["instances"].pred_boxes), len(outputs["instances"].pred_classes)
-        assert num_total_boxes == num_total_labels, "incorrect number of boxes and labels"
+        correct_boxes, correct_masks = [], []
 
-        for index in range(num_total_boxes):
+        num_total_labels = len(outputs["instances"].pred_classes)
+
+        for index in range(num_total_labels):
             if pred_labels[index] == 0:
                 correct_boxes.append(outputs["instances"].pred_boxes[index])
+                correct_masks.append(outputs["instances"].pred_masks[index])
 
-        areas = [each_box.area().detach().cpu().numpy() for each_box in correct_boxes]
-        box_area = max(areas)
+        box_areas = [each_box.area().detach().cpu().item() for each_box in correct_boxes]
+        box_area = max(box_areas)
+        mask_areas = [torch.sum(each_mask).detach().cpu().item() for each_mask in correct_masks]
+        mask_area = max(mask_areas)
     else:
         assert (len(pred_labels) == 0 or torch.min(pred_labels) >= 1)
         box_area = 0.0
+        mask_area = 0.0
     
     # visualize utils
     # im = cv2.imread(image)
     # v = Visualizer(im[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.2)
     # out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
     # cv2.imwrite(image.replace(".png", "_viz.png"), out.get_image()[:, :, ::-1])
-    return box_area
+    return box_area, mask_area
 
 
 def compute_box_area_metrics(args):
@@ -60,16 +64,19 @@ def compute_box_area_metrics(args):
     predictor = DefaultPredictor(cfg)
 
     for cfg_w in w_lst:
-        box_area = []
+        box_area, mask_area = [], []
         print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
         img_dataset = SimpleDataset(root=f"{args.master_folder}/guide_w{cfg_w}")
         img_dataload = DataLoader(img_dataset, batch_size=1, shuffle=False, num_workers=4) # per-image inference
         for sample, path in iter(img_dataload):
             with torch.no_grad():
-                new_box_area = compute_area(path[0], predictor)
+                new_box_area, new_mask_area = compute_area(path[0], predictor)
             box_area.append(new_box_area)
+            mask_area.append(new_mask_area)
         box_area_avg = np.mean(np.array(box_area, dtype=np.float64))
+        mask_area_avg = np.mean(np.array(mask_area, dtype=np.float64))
         print(f"mean detected box area: {box_area_avg}")
+        print(f"mean detected mask area: {mask_area_avg}")
     
     return
 
