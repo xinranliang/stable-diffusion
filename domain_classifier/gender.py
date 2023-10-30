@@ -32,14 +32,14 @@ class TxtImg_Gender(datasets.ImageFolder):
         super().__init__(root, transform, target_transform)
 
 
-def clip_predict(batch_size, cfg_w, img_dir, sub_name):
+def clip_predict(batch_size, cfg_w, img_dir, sub_name, prompt_date):
     # Load the model
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model, preprocess = clip.load('ViT-B/32', device)
 
     # prepare data
     root_path = f"{img_dir}/guide_w{cfg_w}"
-    txtimg_gen_dataset = SimpleDataset(root = root_path, subset = sub_name, transform = preprocess)
+    txtimg_gen_dataset = SimpleDataset(root = root_path, subset = sub_name, exp_date = prompt_date, transform = preprocess)
     txtimg_gen_dataloader = DataLoader(txtimg_gen_dataset, batch_size = batch_size, shuffle=False, num_workers=4)
     domain_text = torch.cat([clip.tokenize(f"a photo of a {domain}") for domain in DOMAINS]) # num_labels x token_length
 
@@ -73,11 +73,12 @@ def main():
 
     parser.add_argument("--master-folder", type=str, help="path to master folder, not including cfg_w")
     parser.add_argument("--subset-name", type=str, help="string name of a subset to evaluate")
+    parser.add_argument("--date", type=str, help="date of experiments for logging")
 
     opt = parser.parse_args()
 
     for cfg_w in w_lst:
-        return_dict = clip_predict(batch_size=128, cfg_w=cfg_w, img_dir=opt.master_folder, sub_name=opt.subset_name)
+        return_dict = clip_predict(batch_size=512, cfg_w=cfg_w, img_dir=opt.master_folder, sub_name=opt.subset_name, prompt_date=opt.date)
         print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
 
         # overall or specify a subset
@@ -90,7 +91,7 @@ def main():
         print(f"text prompt: {job_name}")
         full_results = []
         for cfg_w in w_lst:
-            return_dict = clip_predict(batch_size=128, cfg_w=cfg_w, img_dir=opt.master_folder, sub_name=job_name)
+            return_dict = clip_predict(batch_size=512, cfg_w=cfg_w, img_dir=opt.master_folder, sub_name=job_name, prompt_date=opt.date)
             full_results.append(return_dict["num_female"])
         print(f"portion of predicted female: {full_results}")
 

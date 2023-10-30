@@ -67,9 +67,11 @@ def compute_area_metrics(args):
     for cfg_w in w_lst:
         box_area, mask_area = [], []
         print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
-        img_dataset = SimpleDataset(root=f"{args.master_folder}/guide_w{cfg_w}", subset=args.subset_name, exp_date=args.date)
+        img_dataset = SimpleDataset(root=f"{args.master_folder}/guide_w{cfg_w}", subset=args.subset_name, exp_date=args.date, domain=args.domain_name)
         img_dataload = DataLoader(img_dataset, batch_size=1, shuffle=False, num_workers=4) # per-image inference
         for sample, path in iter(img_dataload):
+            if args.domain_name is not None:
+                assert args.domain_name in path[0], "evaluating samples not from sepcified domain!"
             with torch.no_grad():
                 new_box_area, new_mask_area = compute_area(path[0], predictor)
             box_area.append(new_box_area)
@@ -85,9 +87,11 @@ def compute_area_metrics(args):
         box_area_results, mask_area_results = [], []
         for cfg_w in w_lst:
             box_area, mask_area = [], []
-            img_dataset = SimpleDataset(root=f"{args.master_folder}/guide_w{cfg_w}", subset=args.subset_name, exp_date=args.date)
+            img_dataset = SimpleDataset(root=f"{args.master_folder}/guide_w{cfg_w}", subset=args.subset_name, exp_date=args.date, domain=args.domain_name)
             img_dataload = DataLoader(img_dataset, batch_size=1, shuffle=False, num_workers=4) # per-image inference
             for sample, path in iter(img_dataload):
+                if args.domain_name is not None:
+                    assert args.domain_name in path[0], "evaluating samples not from sepcified domain!"
                 with torch.no_grad():
                     new_box_area, new_mask_area = compute_area(path[0], predictor)
                 box_area.append(new_box_area)
@@ -107,6 +111,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--master-folder", type=str, help="path to master folder, not including cfg_w")
     parser.add_argument("--subset-name", type=str, help="string name of a subset to evaluate")
+    parser.add_argument("--domain-name", type=str, help="string name of a domain to evaluate")
     parser.add_argument("--date", type=str, help="date of experiments for logging")
 
     args = parser.parse_args()

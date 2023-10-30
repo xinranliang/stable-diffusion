@@ -16,12 +16,19 @@ social_job_list = ["administrative assistant", "electrician", "author", "opticia
 # guidance values
 w_lst = [1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.0]
 
-def get_job_prompt(job_name, gender_label=None):
+def get_job_prompt(job_name, prompt_date, gender_label=None):
+    if prompt_date == "2023-10-12" or prompt_date == "2023-10-15":
+        extend_description = " in the center"
+    elif prompt_date == "2023-10-26" or prompt_date == "2023-10-29":
+        extend_description = ""
+    else:
+        raise ValueError("invalid experiments date")
+
     if gender_label is None:
-        return "A photo of a single {}.".format(job_name.lower())
+        return "A photo of a single {}{}.".format(job_name.lower(), extend_description)
     else:
         assert gender_label == "male" or gender_label == "female", "unspecified gender label"
-        return "A photo of a single {} {}.".format(gender_label, job_name.lower())
+        return "A photo of a single {} {}{}.".format(gender_label, job_name.lower(), extend_description)
 
 
 def guidance_sample():
@@ -40,11 +47,11 @@ def guidance_sample():
 
 def guidance_sample_loadmodel(batch_size, num_divide, current_divide, date, curr_batch):
     if date == "2023-09-13": # 100 jobs
-        prompt_list = [get_job_prompt(job_name) for job_name in train_list] + [get_job_prompt(job_name) for job_name in test_list]
-    elif date == "2023-10-26": # 40 jobs, gender-agnostic
-        prompt_list = [get_job_prompt(job_name) for job_name in social_job_list]
-    elif date == "2023-10-27": # 40 jobs, extended prompts
-        prompt_list = [get_job_prompt(job_name, "male") for job_name in social_job_list] + [get_job_prompt(job_name, "female") for job_name in social_job_list]
+        prompt_list = [get_job_prompt(job_name, date) for job_name in train_list] + [get_job_prompt(job_name, date) for job_name in test_list]
+    elif date == "2023-10-12" or date == "2023-10-26": # 40 jobs, gender-agnostic
+        prompt_list = [get_job_prompt(job_name, date) for job_name in social_job_list]
+    elif date == "2023-10-15" or date == "2023-10-29": # 40 jobs, extended prompts
+        prompt_list = [get_job_prompt(job_name, date, "male") for job_name in social_job_list] + [get_job_prompt(job_name, date, "female") for job_name in social_job_list]
 
     unit_divide = len(prompt_list) // num_divide
     prompt_list = prompt_list[unit_divide * current_divide : unit_divide * (current_divide + 1)]
@@ -63,12 +70,7 @@ def guidance_sample_loadmodel(batch_size, num_divide, current_divide, date, curr
             for curr_idx in range(len(prompt_list)):
                 curr_prompt = prompt_list[curr_idx]
                 curr_job_name = curr_prompt.lower().replace(" ", "_")
-                if "male" in curr_job_name:
-                    sample_path = os.path.join(f"./logs/samples/{date}", f"guide_w{w - 1.0}/male/{curr_job_name}")
-                elif "female" in curr_job_name:
-                    sample_path = os.path.join(f"./logs/samples/{date}", f"guide_w{w - 1.0}/female/{curr_job_name}")
-                else:
-                    sample_path = os.path.join(f"./logs/samples/{date}", f"guide_w{w - 1.0}/{curr_job_name}")
+                sample_path = os.path.join(f"./logs/samples/{date}", f"guide_w{w - 1.0}/{curr_job_name}")
                 os.makedirs(sample_path, exist_ok=True)
                 
                 image_lst[curr_idx].save(os.path.join(sample_path, "run{}_{:02d}.png".format(curr_batch, bs_idx)))
@@ -85,6 +87,7 @@ if __name__ == "__main__":
     parser.add_argument("--date", type=str, help="date of experiments")
 
     opt = parser.parse_args()
+    print(f"command line arguments: {opt}")
 
     guidance_sample_loadmodel(batch_size = opt.batch_size, num_divide = opt.num_batch, current_divide = opt.curr_batch, date=opt.date, curr_batch=opt.curr_run)
     

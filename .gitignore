@@ -5,3 +5,4 @@
 *slurm_output*
 *.png
 *.ipynb_checkpoints*
+*slurm*

@@ -13,4 +13,4 @@ source ~/.bashrc
 conda activate latent-diffusion
 cd /n/fs/xl-diffbia/projects/stable-diffusion
 
-CUDA_VISIBLE_DEVICES=0 python domain_classifier/gender.py --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-26
+CUDA_VISIBLE_DEVICES=0 python domain_classifier/gender.py --date 2023-10-26 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-26
