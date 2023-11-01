@@ -30,6 +30,20 @@ def get_job_prompt(job_name, prompt_date, gender_label=None):
         assert gender_label == "male" or gender_label == "female", "unspecified gender label"
         return "A photo of a single {} {}{}.".format(gender_label, job_name.lower(), extend_description)
 
+def get_generic_prompt(prompt_date, gender_label=None):
+    if prompt_date == "2023-10-30":
+        extend_description = " in the center"
+    elif prompt_date == "2023-10-31":
+        extend_description = ""
+    else:
+        raise ValueError("invalid experiments date")
+
+    if gender_label is None:
+        return "A photo of a person{}.".format(extend_description)
+    else:
+        assert gender_label == "male" or gender_label == "female", "unspecified gender label"
+        return "A photo of a {} person{}.".format(gender_label, extend_description)
+
 
 def guidance_sample():
     sys_comm = [
@@ -52,9 +66,12 @@ def guidance_sample_loadmodel(batch_size, num_divide, current_divide, date, curr
         prompt_list = [get_job_prompt(job_name, date) for job_name in social_job_list]
     elif date == "2023-10-15" or date == "2023-10-29": # 40 jobs, extended prompts
         prompt_list = [get_job_prompt(job_name, date, "male") for job_name in social_job_list] + [get_job_prompt(job_name, date, "female") for job_name in social_job_list]
+    elif date == "2023-10-30" or date == "2023-10-31":
+        prompt_list = [get_generic_prompt(date)] + [get_generic_prompt(date, "male")] + [get_generic_prompt(date, "female")]
 
-    unit_divide = len(prompt_list) // num_divide
-    prompt_list = prompt_list[unit_divide * current_divide : unit_divide * (current_divide + 1)]
+    if num_divide > 1:
+        unit_divide = len(prompt_list) // num_divide
+        prompt_list = prompt_list[unit_divide * current_divide : unit_divide * (current_divide + 1)]
     
     repo_id = "stabilityai/stable-diffusion-2-base"
     pipe = DiffusionPipeline.from_pretrained(repo_id, torch_dtype=torch.float16, revision="fp16")

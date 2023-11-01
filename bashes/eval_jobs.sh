@@ -13,4 +13,22 @@ source ~/.bashrc
 conda activate latent-diffusion
 cd /n/fs/xl-diffbia/projects/stable-diffusion
 
+# job_name w/o extended prompt
+CUDA_VISIBLE_DEVICES=0 python domain_classifier/gender.py --date 2023-10-12 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-12
 CUDA_VISIBLE_DEVICES=0 python domain_classifier/gender.py --date 2023-10-26 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-26
+
+# job_name w/ extended prompt
+CUDA_VISIBLE_DEVICES=0 python domain_classifier/gender.py --date 2023-10-15 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-15 --domain-name female
+CUDA_VISIBLE_DEVICES=0 python domain_classifier/gender.py --date 2023-10-15 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-15 --domain-name male
+CUDA_VISIBLE_DEVICES=0 python domain_classifier/gender.py --date 2023-10-29 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-29 --domain-name female
+CUDA_VISIBLE_DEVICES=0 python domain_classifier/gender.py --date 2023-10-29 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-29 --domain-name male
+
+# generic w/o extended prompt
+CUDA_VISIBLE_DEVICES=0 python domain_classifier/gender.py --date 2023-10-30 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-30
+CUDA_VISIBLE_DEVICES=0 python domain_classifier/gender.py --date 2023-10-31 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-31
+
+# generic w/ extended prompt
+CUDA_VISIBLE_DEVICES=0 python domain_classifier/gender.py --date 2023-10-30 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-30 --domain-name female
+CUDA_VISIBLE_DEVICES=0 python domain_classifier/gender.py --date 2023-10-31 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-31 --domain-name female
+CUDA_VISIBLE_DEVICES=0 python domain_classifier/gender.py --date 2023-10-30 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-30 --domain-name male
+CUDA_VISIBLE_DEVICES=0 python domain_classifier/gender.py --date 2023-10-31 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-31 --domain-name male

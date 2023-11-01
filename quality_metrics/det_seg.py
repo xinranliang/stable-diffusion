@@ -16,7 +16,7 @@ from detectron2.config import get_cfg
 from detectron2.utils.visualizer import Visualizer
 from detectron2.data import MetadataCatalog, DatasetCatalog
 
-from utils import SimpleDataset
+from utils import SimpleDataset, social_job_list
 
 # guidance values
 w_lst = [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0]
@@ -46,12 +46,14 @@ def compute_area(image, predictor):
         box_area = 0.0
         mask_area = 0.0
     
-    # visualize utils
-    # im = cv2.imread(image)
-    # v = Visualizer(im[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.2)
-    # out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
-    # cv2.imwrite(image.replace(".png", "_viz.png"), out.get_image()[:, :, ::-1])
     return box_area, mask_area
+
+def visualize_area(image, outputs):
+    # visualize utils
+    im = cv2.imread(image)
+    v = Visualizer(im[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.2)
+    out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
+    cv2.imwrite(image.replace(".png", "_viz.png"), out.get_image()[:, :, ::-1])
 
 
 def compute_area_metrics(args):
@@ -78,6 +80,8 @@ def compute_area_metrics(args):
         mask_area_avg = np.mean(np.array(mask_area, dtype=np.float64))
         print(f"mean detected box area: {box_area_avg}")
         print(f"mean detected mask area: {mask_area_avg}")
+    if args.date == "2023-10-30" or args.date == "2023-10-31":
+        return
     
     # go over each one
     for job_name in social_job_list:
@@ -85,13 +89,14 @@ def compute_area_metrics(args):
         box_area_results, mask_area_results = [], []
         for cfg_w in w_lst:
             box_area, mask_area = [], []
-            img_dataset = SimpleDataset(root=f"{args.master_folder}/guide_w{cfg_w}", subset=args.subset_name, exp_date=args.date)
+            img_dataset = SimpleDataset(root=f"{args.master_folder}/guide_w{cfg_w}", subset=job_name, exp_date=args.date)
             img_dataload = DataLoader(img_dataset, batch_size=1, shuffle=False, num_workers=4) # per-image inference
             for sample, path in iter(img_dataload):
                 with torch.no_grad():
                     new_box_area, new_mask_area = compute_area(path[0], predictor)
                 box_area.append(new_box_area)
                 mask_area.append(new_mask_area)
+            print(f"total number of samples: {len(box_area)}")
             box_area_avg = np.mean(np.array(box_area, dtype=np.float64))
             mask_area_avg = np.mean(np.array(mask_area, dtype=np.float64))
             box_area_results.append(box_area_avg)

@@ -27,11 +27,25 @@ def get_job_prompt(job_name, prompt_date, gender_label=None):
         assert gender_label == "male" or gender_label == "female", "unspecified gender label"
         return "A photo of a single {} {}{}.".format(gender_label, job_name.lower(), extend_description)
 
+def get_generic_prompt(prompt_date, gender_label=None):
+    if prompt_date == "2023-10-30":
+        extend_description = " in the center"
+    elif prompt_date == "2023-10-31":
+        extend_description = ""
+    else:
+        raise ValueError("invalid experiments date")
+
+    if gender_label is None:
+        return "A photo of a person{}.".format(extend_description)
+    else:
+        assert gender_label == "male" or gender_label == "female", "unspecified gender label"
+        return "A photo of a {} person{}.".format(gender_label, extend_description)
+
 
 class SimpleDataset(Dataset):
     """An simple image dataset for calculating inception score and FID."""
 
-    def __init__(self, root, subset=None, exp_date="none", exts=['png', 'jpg', 'JPEG'], transform=None, num_images=None):
+    def __init__(self, root, subset=None, exp_date="none", domain=None, exts=['png', 'jpg', 'JPEG'], transform=None, num_images=None):
         """Construct an image dataset.
 
         Args:
@@ -48,7 +62,10 @@ class SimpleDataset(Dataset):
         self.paths = []
         self.transform = transform
         if subset is not None:
-            subset_dir = get_job_prompt(subset, exp_date).lower().replace(" ", "_")
+            subset_dir = get_job_prompt(subset, exp_date, domain).lower().replace(" ", "_")
+            root = os.path.join(root, subset_dir)
+        if exp_date == "2023-10-30" or exp_date == "2023-10-31":
+            subset_dir = get_generic_prompt(exp_date, domain).lower().replace(" ", "_")
             root = os.path.join(root, subset_dir)
         for ext in exts:
             self.paths.extend(

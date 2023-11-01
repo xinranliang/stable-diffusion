@@ -27,6 +27,20 @@ def get_job_prompt(job_name, prompt_date, gender_label=None):
         assert gender_label == "male" or gender_label == "female", "unspecified gender label"
         return "A photo of a single {} {}{}.".format(gender_label, job_name.lower(), extend_description)
 
+def get_generic_prompt(prompt_date, gender_label=None):
+    if prompt_date == "2023-10-30":
+        extend_description = " in the center"
+    elif prompt_date == "2023-10-31":
+        extend_description = ""
+    else:
+        raise ValueError("invalid experiments date")
+
+    if gender_label is None:
+        return "A photo of a person{}.".format(extend_description)
+    else:
+        assert gender_label == "male" or gender_label == "female", "unspecified gender label"
+        return "A photo of a {} person{}.".format(gender_label, extend_description)
+
 
 class SimpleDataset(Dataset):
     """An simple image dataset for calculating inception score and FID."""
@@ -54,14 +68,24 @@ class SimpleDataset(Dataset):
         if subset is not None:
             subset_dir = get_job_prompt(subset, exp_date, domain).lower().replace(" ", "_")
             root = os.path.join(root, subset_dir)
+        if exp_date == "2023-10-30" or exp_date == "2023-10-31":
+            subset_dir = get_generic_prompt(exp_date, domain).lower().replace(" ", "_")
+            root = os.path.join(root, subset_dir)
         for ext in exts:
             if domain is None:
                 self.paths.extend(
                     list(glob(
                         os.path.join(root, '**/*.%s' % ext), recursive=True)))
-            else:
+            elif domain == "female":
                 all_files = list(glob(os.path.join(root, '**/*.%s' % ext), recursive=True))
-                filter_files = [each_file for each_file in all_files if domain in each_file]
+                filter_files = [each_file for each_file in all_files if "female" in each_file]
+                self.paths.extend(filter_files)
+            elif domain == "male":
+                all_files = list(glob(os.path.join(root, '**/*.%s' % ext), recursive=True))
+                filter_files = []
+                for each_file in all_files:
+                    if "male" in each_file and "female" not in each_file:
+                        filter_files.append(each_file)
                 self.paths.extend(filter_files)
         self.paths = self.paths[:num_images]
 

@@ -16,7 +16,7 @@ from detectron2.config import get_cfg
 from detectron2.utils.visualizer import Visualizer
 from detectron2.data import MetadataCatalog, DatasetCatalog
 
-from utils import SimpleDataset
+from utils import SimpleDataset, social_job_list
 
 # guidance values
 w_lst = [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0]
@@ -76,10 +76,13 @@ def compute_area_metrics(args):
                 new_box_area, new_mask_area = compute_area(path[0], predictor)
             box_area.append(new_box_area)
             mask_area.append(new_mask_area)
+        print(f"total number of samples: {len(box_area)}")
         box_area_avg = np.mean(np.array(box_area, dtype=np.float64))
         mask_area_avg = np.mean(np.array(mask_area, dtype=np.float64))
         print(f"mean detected box area: {box_area_avg}")
         print(f"mean detected mask area: {mask_area_avg}")
+    if args.date == "2023-10-30" or args.date == "2023-10-31":
+        return
     
     # go over each one
     for job_name in social_job_list:
@@ -87,7 +90,7 @@ def compute_area_metrics(args):
         box_area_results, mask_area_results = [], []
         for cfg_w in w_lst:
             box_area, mask_area = [], []
-            img_dataset = SimpleDataset(root=f"{args.master_folder}/guide_w{cfg_w}", subset=args.subset_name, exp_date=args.date, domain=args.domain_name)
+            img_dataset = SimpleDataset(root=f"{args.master_folder}/guide_w{cfg_w}", subset=job_name, exp_date=args.date, domain=args.domain_name)
             img_dataload = DataLoader(img_dataset, batch_size=1, shuffle=False, num_workers=4) # per-image inference
             for sample, path in iter(img_dataload):
                 if args.domain_name is not None:
@@ -96,6 +99,7 @@ def compute_area_metrics(args):
                     new_box_area, new_mask_area = compute_area(path[0], predictor)
                 box_area.append(new_box_area)
                 mask_area.append(new_mask_area)
+            print(f"total number of samples: {len(box_area)}")
             box_area_avg = np.mean(np.array(box_area, dtype=np.float64))
             mask_area_avg = np.mean(np.array(mask_area, dtype=np.float64))
             box_area_results.append(box_area_avg)

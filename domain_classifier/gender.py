@@ -20,26 +20,14 @@ DOMAINS = (
 w_lst = [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0]
 
 
-class TxtImg_Gender(datasets.ImageFolder):
-    def __init__(
-        self, 
-        root,
-        transform, 
-        target_transform,
-        cfg_w
-    ):
-        root = os.path.join(root, f"guide_w{cfg_w}")
-        super().__init__(root, transform, target_transform)
-
-
-def clip_predict(batch_size, cfg_w, img_dir, sub_name, prompt_date):
+def clip_predict(batch_size, cfg_w, args):
     # Load the model
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model, preprocess = clip.load('ViT-B/32', device)
 
     # prepare data
-    root_path = f"{img_dir}/guide_w{cfg_w}"
-    txtimg_gen_dataset = SimpleDataset(root = root_path, subset = sub_name, exp_date = prompt_date, transform = preprocess)
+    root_path = f"{args.master_folder}/guide_w{cfg_w}"
+    txtimg_gen_dataset = SimpleDataset(root = root_path, subset = args.subset_name, exp_date = args.date, domain = args.domain_name, transform = preprocess)
     txtimg_gen_dataloader = DataLoader(txtimg_gen_dataset, batch_size = batch_size, shuffle=False, num_workers=4)
     domain_text = torch.cat([clip.tokenize(f"a photo of a {domain}") for domain in DOMAINS]) # num_labels x token_length
 
@@ -73,25 +61,30 @@ def main():
 
     parser.add_argument("--master-folder", type=str, help="path to master folder, not including cfg_w")
     parser.add_argument("--subset-name", type=str, help="string name of a subset to evaluate")
+    parser.add_argument("--domain-name", type=str, help="string name of a domain to evaluate")
     parser.add_argument("--date", type=str, help="date of experiments for logging")
 
     opt = parser.parse_args()
 
-    for cfg_w in w_lst:
-        return_dict = clip_predict(batch_size=512, cfg_w=cfg_w, img_dir=opt.master_folder, sub_name=opt.subset_name, prompt_date=opt.date)
-        print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
+    if opt.domain_name is None:
+        for cfg_w in w_lst:
+            return_dict = clip_predict(batch_size=512, cfg_w=cfg_w, args=opt)
+            print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
 
-        # overall or specify a subset
-        if opt.subset_name is not None:
-            print(f"text prompt: {opt.subset_name}")
-        print("portion of predicted female: {:03f}".format(return_dict["num_female"]))
+            # overall or specify a subset
+            if opt.subset_name is not None:
+                print(f"text prompt: {opt.subset_name}")
+            print("portion of predicted female: {:03f}".format(return_dict["num_female"]))
+    if opt.date == "2023-10-30" or opt.date == "2023-10-31":
+        return
 
     # go over each one
     for job_name in social_job_list:
         print(f"text prompt: {job_name}")
+        opt.subset_name = job_name
         full_results = []
         for cfg_w in w_lst:
-            return_dict = clip_predict(batch_size=512, cfg_w=cfg_w, img_dir=opt.master_folder, sub_name=job_name, prompt_date=opt.date)
+            return_dict = clip_predict(batch_size=512, cfg_w=cfg_w, args=opt)
             full_results.append(return_dict["num_female"])
         print(f"portion of predicted female: {full_results}")
 

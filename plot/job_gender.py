@@ -230,41 +230,211 @@ def plot_is(job_name=None):
     plt.close()
 
 
-def plot_box_area(ratio, job_name=None):
-    ws = np.array([2.0, 4.0, 6.0, 8.0, 10.0, 12.0], dtype=np.float64)
+def plot_area(ratio, prompt_date, job_name=None):
+    ws = np.array([0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0], dtype=np.float64)
 
     if job_name is None:
-        ws = np.array([0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0], dtype=np.float64)
-        if ratio:
-            box_area = np.array([48540.142, 68357.158, 76789.037, 81876.793, 84748.730, 86698.360, 89210.068], dtype=np.float64) / (512 * 512)
-        else:
-            box_area = np.array([48540.142, 68357.158, 76789.037, 81876.793, 84748.730, 86698.360, 89210.068], dtype=np.float64) / 10**4
-
-        plt.figure(figsize=(8, 8/1.6))
-        with plt.style.context('ggplot'):
-            plt.plot(ws, box_area, linestyle="-", marker='o')
-
-            plt.xticks(ws, ws)
-            plt.xlabel("Scale of classifier-free guidance ($w$)")
+        if prompt_date == "2023-10-12":
+            box_area = np.array([48550.430, 68355.853, 76791.824, 81875.920, 84747.966, 86693.238, 89211.151], dtype=np.float64)
+            mask_area = np.array([27448.790, 39572.997, 44905.137, 48086.105, 49862.348, 51317.725, 52755.480], dtype=np.float64)
             if ratio:
-                plt.ylim(0.0, 1.01)
-                plt.yticks(np.arange(0.0, 1.01, step=0.1))
-                plt.ylabel(r"Percent of Bounding Box Area on Image")
+                box_area /= (512 * 512)
+                mask_area /= (512 * 512)
             else:
-                plt.ylim(4.0, 10.01)
-                plt.yticks(np.arange(4.0, 10.01, step=1.0))
-                plt.ylabel(r"Detected Bounding Box Area ($\times 10^4$)")
-            plt.title(f"Box Area of Detected Human w.r.t Guidance on stable-diffusion-v2")
-        
+                box_area /= 10**4
+                mask_area /= 10**4
+            
+            plt.figure(figsize=(8, 8/1.6))
+            with plt.style.context('ggplot'):
+                plt.plot(ws, box_area, linestyle="-", marker='o', label="bounding box")
+                plt.plot(ws, mask_area, linestyle="-", marker='o', label="segmentation mask")
+
+                plt.xticks(ws, ws)
+                plt.xlabel("Scale of classifier-free guidance ($w$)")
+                if ratio:
+                    plt.ylim(0.0, 0.41)
+                    plt.yticks(np.arange(0.0, 0.41, step=0.05))
+                    plt.ylabel(r"Percent of Detected Area on Image")
+                else:
+                    plt.ylim(2.0, 10.01)
+                    plt.yticks(np.arange(2.0, 10.01, step=1.0))
+                    plt.ylabel(r"Number of Pixels in Detected Area ($\times 10^4$)")
+                plt.legend()
+                plt.title(f"Average Area of the Predicted Person w.r.t Guidance on stable-diffusion-v2")
+
+        elif prompt_date == "2023-10-26":
+            box_area = np.array([82924.642, 121720.477, 133533.202, 139010.645, 142598.854, 144935.181, 147329.351], dtype=np.float64)
+            mask_area = np.array([48482.189, 72501.553, 79607.583, 82540.191, 84850.324, 86134.319, 87486.960], dtype=np.float64)
+            if ratio:
+                box_area /= (512 * 512)
+                mask_area /= (512 * 512)
+            else:
+                box_area /= 10**4
+                mask_area /= 10**4
+            
+            plt.figure(figsize=(8, 8/1.6))
+            with plt.style.context('ggplot'):
+                plt.plot(ws, box_area, linestyle="-", marker='o', label="bounding box")
+                plt.plot(ws, mask_area, linestyle="-", marker='o', label="segmentation mask")
+
+                plt.xticks(ws, ws)
+                plt.xlabel("Scale of classifier-free guidance ($w$)")
+                if ratio:
+                    plt.ylim(0.1, 0.71)
+                    plt.yticks(np.arange(0.1, 0.71, step=0.05))
+                    plt.ylabel(r"Percent of Detected Area on Image")
+                else:
+                    plt.ylim(4.0, 16.01)
+                    plt.yticks(np.arange(4.0, 16.01, step=1.0))
+                    plt.ylabel(r"Number of Pixels in Detected Area ($\times 10^4$)")
+                plt.legend()
+                plt.title(f"Average Area of the Predicted Person w.r.t Guidance on stable-diffusion-v2")
+
         if ratio:
-            plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-12/figures/sbv2_box_area_overall_ratio.png", dpi=300, bbox_inches="tight")
-            plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-12/figures/sbv2_box_area_overall_ratio.pdf", dpi=300, bbox_inches="tight")
+            plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_area_ratio.png", dpi=300, bbox_inches="tight")
+            plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_area_ratio.pdf", dpi=300, bbox_inches="tight")
         else:
-            plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-12/figures/sbv2_box_area_overall_value.png", dpi=300, bbox_inches="tight")
-            plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-12/figures/sbv2_box_area_overall_value.pdf", dpi=300, bbox_inches="tight")
+            plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_area_value.png", dpi=300, bbox_inches="tight")
+            plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_area_value.pdf", dpi=300, bbox_inches="tight")
         plt.close()
 
         return
+
+def plot_area_bygender(ratio, prompt_date, job_name=None):
+    ws = np.array([0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0], dtype=np.float64)
+
+    if job_name is None:
+        if prompt_date == "2023-10-15":
+            box_area_male = np.array([78676.913, 109148.644, 118823.930, 124649.410, 127712.918, 131233.132, 133176.112], dtype=np.float64)
+            mask_area_male = np.array([45484.614, 64226.906, 70282.112, 73678.847, 75603.492, 77699.298, 78783.261], dtype=np.float64)
+            box_area_female = np.array([79676.502, 110240.143, 119872.307, 124879.661, 129482.391, 132587.020, 134675.232], dtype=np.float64)
+            mask_area_female = np.array([46215.723, 65724.784, 71985.728, 75178.224, 77971.478, 79801.550, 81236.795], dtype=np.float64)
+            if ratio:
+                box_area_male /= (512 * 512)
+                mask_area_male /= (512 * 512)
+                box_area_female /= (512 * 512)
+                mask_area_female /= (512 * 512)
+            else:
+                box_area_male /= 10**4
+                mask_area_male /= 10**4
+                box_area_female /= 10**4
+                mask_area_female /= 10**4
+            
+            plt.figure(figsize=(8, 8/1.6))
+            with plt.style.context('ggplot'):
+                plt.plot(ws, box_area_male, linestyle="-", marker='o', label="male")
+                plt.plot(ws, box_area_female, linestyle="-", marker='o', label="female")
+
+                plt.xticks(ws, ws)
+                plt.xlabel("Scale of classifier-free guidance ($w$)")
+                if ratio:
+                    plt.ylim(0.2, 0.61)
+                    plt.yticks(np.arange(0.2, 0.61, step=0.05))
+                    plt.ylabel(r"Percent of Predicted Box Area on Image")
+                else:
+                    plt.ylim(7.0, 15.01)
+                    plt.yticks(np.arange(7.0, 15.01, step=1.0))
+                    plt.ylabel(r"Number of Pixels in Predicted Box Area ($\times 10^4$)")
+                plt.legend()
+                plt.title(f"Average Area of the Predicted Bounding Box Person w.r.t Guidance on stable-diffusion-v2")
+                if ratio:
+                    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_box_area_ratio_bygender.png", dpi=300, bbox_inches="tight")
+                    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_box_area_ratio_bygender.pdf", dpi=300, bbox_inches="tight")
+                else:
+                    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_box_area_value_bygender.png", dpi=300, bbox_inches="tight")
+                    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_box_area_value_bygender.pdf", dpi=300, bbox_inches="tight")
+            plt.close()
+
+            plt.figure(figsize=(8, 8/1.6))
+            with plt.style.context('ggplot'):
+                plt.plot(ws, mask_area_male, linestyle="-", marker='o', label="male")
+                plt.plot(ws, mask_area_female, linestyle="-", marker='o', label="female")
+
+                plt.xticks(ws, ws)
+                plt.xlabel("Scale of classifier-free guidance ($w$)")
+                if ratio:
+                    plt.ylim(0.1, 0.41)
+                    plt.yticks(np.arange(0.1, 0.41, step=0.05))
+                    plt.ylabel(r"Percent of Predicted Mask Area on Image")
+                else:
+                    plt.ylim(4.0, 9.01)
+                    plt.yticks(np.arange(4.0, 9.01, step=0.5))
+                    plt.ylabel(r"Number of Pixels in Predicted Mask Area ($\times 10^4$)")
+                plt.legend()
+                plt.title(f"Average Area of the Predicted Segmentation Mask Person w.r.t Guidance on stable-diffusion-v2")
+                if ratio:
+                    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_mask_area_ratio_bygender.png", dpi=300, bbox_inches="tight")
+                    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_mask_area_ratio_bygender.pdf", dpi=300, bbox_inches="tight")
+                else:
+                    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_mask_area_value_bygender.png", dpi=300, bbox_inches="tight")
+                    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_mask_area_value_bygender.pdf", dpi=300, bbox_inches="tight")
+            plt.close()
+
+        elif prompt_date == "2023-10-29":
+            box_area_male = np.array([78676.913, 109148.644, 118823.930, 124649.410, 127712.918, 131233.132, 133176.112], dtype=np.float64)
+            mask_area_male = np.array([45484.614, 64226.906, 70282.112, 73678.847, 75603.492, 77699.298, 78783.261], dtype=np.float64)
+            box_area_female = np.array([79676.502, 110240.143, 119872.307, 124879.661, 129482.391, 132587.020, 134675.232], dtype=np.float64)
+            mask_area_female = np.array([46215.723, 65724.784, 71985.728, 75178.224, 77971.478, 79801.550, 81236.795], dtype=np.float64)
+            if ratio:
+                box_area_male /= (512 * 512)
+                mask_area_male /= (512 * 512)
+                box_area_female /= (512 * 512)
+                mask_area_female /= (512 * 512)
+            else:
+                box_area_male /= 10**4
+                mask_area_male /= 10**4
+                box_area_female /= 10**4
+                mask_area_female /= 10**4
+            
+            plt.figure(figsize=(8, 8/1.6))
+            with plt.style.context('ggplot'):
+                plt.plot(ws, box_area_male, linestyle="-", marker='o', label="male")
+                plt.plot(ws, box_area_female, linestyle="-", marker='o', label="female")
+
+                plt.xticks(ws, ws)
+                plt.xlabel("Scale of classifier-free guidance ($w$)")
+                if ratio:
+                    plt.ylim(0.0, 0.41)
+                    plt.yticks(np.arange(0.0, 0.41, step=0.05))
+                    plt.ylabel(r"Percent of Predicted Box Area on Image")
+                else:
+                    plt.ylim(2.0, 10.01)
+                    plt.yticks(np.arange(2.0, 10.01, step=1.0))
+                    plt.ylabel(r"Number of Pixels in Predicted Box Area ($\times 10^4$)")
+                plt.legend()
+                plt.title(f"Average Area of the Predicted Bounding Box Person w.r.t Guidance on stable-diffusion-v2")
+                if ratio:
+                    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_box_area_ratio.png", dpi=300, bbox_inches="tight")
+                    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_box_area_ratio.pdf", dpi=300, bbox_inches="tight")
+                else:
+                    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_box_area_value.png", dpi=300, bbox_inches="tight")
+                    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_box_area_value.pdf", dpi=300, bbox_inches="tight")
+            plt.close()
+
+            plt.figure(figsize=(8, 8/1.6))
+            with plt.style.context('ggplot'):
+                plt.plot(ws, mask_area_male, linestyle="-", marker='o', label="male")
+                plt.plot(ws, mask_area_female, linestyle="-", marker='o', label="female")
+
+                plt.xticks(ws, ws)
+                plt.xlabel("Scale of classifier-free guidance ($w$)")
+                if ratio:
+                    plt.ylim(0.0, 0.41)
+                    plt.yticks(np.arange(0.0, 0.41, step=0.05))
+                    plt.ylabel(r"Percent of Predicted Mask Area on Image")
+                else:
+                    plt.ylim(2.0, 10.01)
+                    plt.yticks(np.arange(2.0, 10.01, step=1.0))
+                    plt.ylabel(r"Number of Pixels in Predicted Mask Area ($\times 10^4$)")
+                plt.legend()
+                plt.title(f"Average Area of the Predicted Segmentation Mask Person w.r.t Guidance on stable-diffusion-v2")
+                if ratio:
+                    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_mask_area_ratio.png", dpi=300, bbox_inches="tight")
+                    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_mask_area_ratio.pdf", dpi=300, bbox_inches="tight")
+                else:
+                    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_mask_area_value.png", dpi=300, bbox_inches="tight")
+                    plt.savefig(f"/n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/{prompt_date}/figures/sbv2_mask_area_value.pdf", dpi=300, bbox_inches="tight")
+            plt.close()
 
 
 if __name__ == "__main__":
@@ -280,5 +450,9 @@ if __name__ == "__main__":
     # common_jobs = ["software developer", "customer service representative"]
     # for name in common_jobs:
         # plot_is(name)
-    plot_box_area(ratio=True)
-    plot_box_area(ratio=False)
+    plot_area(ratio=True, prompt_date="2023-10-12")
+    plot_area(ratio=False, prompt_date="2023-10-12")
+    plot_area(ratio=True, prompt_date="2023-10-26")
+    plot_area(ratio=False, prompt_date="2023-10-26")
+    plot_area_bygender(ratio=True, prompt_date="2023-10-15")
+    plot_area_bygender(ratio=False, prompt_date="2023-10-15")
