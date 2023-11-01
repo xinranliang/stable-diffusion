@@ -66,15 +66,16 @@ def main():
 
     opt = parser.parse_args()
 
-    if opt.domain_name is None:
-        for cfg_w in w_lst:
-            return_dict = clip_predict(batch_size=512, cfg_w=cfg_w, args=opt)
-            print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
+    for cfg_w in w_lst:
+        return_dict = clip_predict(batch_size=512, cfg_w=cfg_w, args=opt)
+        print(f"sampling from stable-diffusion-v2 w/ cfg_w = {cfg_w}")
 
-            # overall or specify a subset
-            if opt.subset_name is not None:
-                print(f"text prompt: {opt.subset_name}")
-            print("portion of predicted female: {:03f}".format(return_dict["num_female"]))
+        # overall or specify a subset
+        if opt.subset_name is not None:
+            print(f"text prompt: {opt.subset_name}")
+        if opt.domain_name is not None:
+            print(f"extended prompt w/ domain: {opt.domain_name}")
+        print("portion of predicted female: {:03f}".format(return_dict["num_female"]))
     if opt.date == "2023-10-30" or opt.date == "2023-10-31":
         return
 
