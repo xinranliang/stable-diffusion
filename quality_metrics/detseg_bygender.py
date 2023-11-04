@@ -81,7 +81,7 @@ def compute_area_metrics(args):
         mask_area_avg = np.mean(np.array(mask_area, dtype=np.float64))
         print(f"mean detected box area: {box_area_avg}")
         print(f"mean detected mask area: {mask_area_avg}")
-    if args.date == "2023-10-30" or args.date == "2023-10-31":
+    if args.date in ["2023-10-30", "2023-10-31", "2023-11-01", "2023-11-02"]:
         return
     
     # go over each one

@@ -15,31 +15,39 @@ social_job_list = ["administrative assistant", "electrician", "author", "opticia
 
 def get_job_prompt(job_name, prompt_date, gender_label=None):
     if prompt_date == "2023-10-12" or prompt_date == "2023-10-15":
-        extend_description = " in the center"
+        extend_description = [" single", " in the center"]
     elif prompt_date == "2023-10-26" or prompt_date == "2023-10-29":
-        extend_description = ""
+        extend_description = [" single", ""]
+    elif prompt_date == "2023-11-03" or prompt_date == "2023-11-04":
+        extend_description = ["", " in the center"]
+    elif prompt_date == "2023-11-05" or prompt_date == "2023-11-06":
+        extend_description = ["", ""]
     else:
         raise ValueError("invalid experiments date")
 
     if gender_label is None:
-        return "A photo of a single {}{}.".format(job_name.lower(), extend_description)
+        return "A photo of a{} {}{}.".format(extend_description[0], job_name.lower(), extend_description[1])
     else:
         assert gender_label == "male" or gender_label == "female", "unspecified gender label"
-        return "A photo of a single {} {}{}.".format(gender_label, job_name.lower(), extend_description)
+        return "A photo of a{}{} {}{}.".format(extend_description[0], f" {gender_label}", job_name.lower(), extend_description[1])
 
 def get_generic_prompt(prompt_date, gender_label=None):
     if prompt_date == "2023-10-30":
-        extend_description = " in the center"
+        extend_description = ["", " in the center"]
     elif prompt_date == "2023-10-31":
-        extend_description = ""
+        extend_description = ["", ""]
+    elif prompt_date == "2023-11-01":
+        extend_description = [" single", " in the center"]
+    elif prompt_date == "2023-11-02":
+        extend_description = [" single", ""]
     else:
         raise ValueError("invalid experiments date")
 
     if gender_label is None:
-        return "A photo of a person{}.".format(extend_description)
+        return "A photo of a{} person{}.".format(extend_description[0], extend_description[1])
     else:
         assert gender_label == "male" or gender_label == "female", "unspecified gender label"
-        return "A photo of a {} person{}.".format(gender_label, extend_description)
+        return "A photo of a{}{} person{}.".format(extend_description[0], f" {gender_label}", extend_description[1])
 
 
 class SimpleDataset(Dataset):
@@ -68,7 +76,7 @@ class SimpleDataset(Dataset):
         if subset is not None:
             subset_dir = get_job_prompt(subset, exp_date, domain).lower().replace(" ", "_")
             root = os.path.join(root, subset_dir)
-        if exp_date == "2023-10-30" or exp_date == "2023-10-31":
+        if exp_date in ["2023-10-30", "2023-10-31", "2023-11-01", "2023-11-02"]:
             subset_dir = get_generic_prompt(exp_date, domain).lower().replace(" ", "_")
             root = os.path.join(root, subset_dir)
         for ext in exts:

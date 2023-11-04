@@ -76,7 +76,7 @@ def main():
         if opt.domain_name is not None:
             print(f"extended prompt w/ domain: {opt.domain_name}")
         print("portion of predicted female: {:03f}".format(return_dict["num_female"]))
-    if opt.date == "2023-10-30" or opt.date == "2023-10-31":
+    if opt.date in ["2023-10-30", "2023-10-31", "2023-11-01", "2023-11-02"]:
         return
 
     # go over each one

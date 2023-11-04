@@ -76,11 +76,12 @@ def compute_area_metrics(args):
                 new_box_area, new_mask_area = compute_area(path[0], predictor)
             box_area.append(new_box_area)
             mask_area.append(new_mask_area)
+        print(f"total number of samples: {len(box_area)}")
         box_area_avg = np.mean(np.array(box_area, dtype=np.float64))
         mask_area_avg = np.mean(np.array(mask_area, dtype=np.float64))
         print(f"mean detected box area: {box_area_avg}")
         print(f"mean detected mask area: {mask_area_avg}")
-    if args.date == "2023-10-30" or args.date == "2023-10-31":
+    if args.date in ["2023-10-30", "2023-10-31", "2023-11-01", "2023-11-02"]:
         return
     
     # go over each one
