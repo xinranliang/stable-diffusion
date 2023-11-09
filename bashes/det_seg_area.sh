@@ -11,8 +11,8 @@ python quality_metrics/detseg_bygender.py --date 2023-10-29 --master-folder /n/f
 python quality_metrics/detseg_bygender.py --date 2023-10-29 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-29 --domain-name male
 python quality_metrics/detseg_bygender.py --date 2023-11-03 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-11-03 --domain-name female
 python quality_metrics/detseg_bygender.py --date 2023-11-03 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-11-03 --domain-name male
-python quality_metrics/detseg_bygender.py --date 2023-11-05 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-11-05 --domain-name female
-python quality_metrics/detseg_bygender.py --date 2023-11-05 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-11-05 --domain-name male
+python quality_metrics/detseg_bygender.py --date 2023-11-06 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-11-06 --domain-name female
+python quality_metrics/detseg_bygender.py --date 2023-11-06 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-11-06 --domain-name male
 
 # generic prompt
 python quality_metrics/det_seg.py --date 2023-10-30 --master-folder /n/fs/xl-diffbia/projects/stable-diffusion/logs/samples/2023-10-30

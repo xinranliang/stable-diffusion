@@ -13,6 +13,20 @@ test_list = ['Accountant', 'Astronaut', 'Biologist', 'Carpenter', 'Civil Enginee
 # 44 occupations
 social_job_list = ["administrative assistant", "electrician", "author", "optician", "announcer", "chemist", "butcher", "building inspector", "bartender", "childcare worker", "chef", "CEO", "biologist", "bus driver", "crane operator", "drafter", "construction worker", "doctor", "custodian", "cook", "nurse practitioner", "mail carrier", "lab tech", "pharmacist", "librarian", "nurse", "housekeeper", "pilot", "roofer", "police officer", "public relations person", "customer service representative", "software developer", "special ed teacher", "receptionist", "plumber", "security guard", "technical writer", "telemarketer", "veterinarian"]
 
+# engineered prompts
+autoeng_prompt_list = [
+    "An image of an individual in casual attire, exuding a sense of confidence and serenity, with a natural outdoor background.",
+    "A portrait of a person with unique facial features, expressive eyes, and a timeless, captivating expression.",
+    "An image of a human figure engaged in a creative activity, surrounded by their tools and materials, highlighting their passion and skill.",
+    "A photograph of a character in a bustling urban environment, capturing the spirit of modern life in a diverse and inclusive city.",
+    "An artistic picture of a person immersed in the act of playing an instrument, with passion and energy radiating from the composition.",
+    "A candid image of an individual in a moment of laughter and joy, surrounded by friends or loved ones, in a warm and welcoming setting.",
+    "A professional figure of a person in an elegant, well-fitted business attire, portraying a sense of competence and leadership.",
+    "A photograph of a person in an imaginative and surreal setting, blurring the lines between reality and fantasy, with vibrant colors and dreamlike elements.",
+    "An image of an athlete in the middle of a powerful and determined performance, showcasing their physical prowess and dedication to their sport.",
+    "A cinematic photo of a contemplative person in a tranquil, natural setting, capturing a sense of inner peace and connection with the environment."
+]
+
 # guidance values
 w_lst = [1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.0]
 
@@ -52,6 +66,11 @@ def get_generic_prompt(prompt_date, gender_label=None):
         assert gender_label == "male" or gender_label == "female", "unspecified gender label"
         return "A photo of a{}{} person{}.".format(extend_description[0], f" {gender_label}", extend_description[1])
 
+def get_engineer_prompt(prompt_date, gender_label=None):
+    if prompt_date == "2023-11-07":
+        prompt_list = autoeng_prompt_list
+    return prompt_list
+
 
 def guidance_sample():
     sys_comm = [
@@ -72,12 +91,14 @@ def guidance_sample_loadmodel(batch_size, num_divide, current_divide, date, curr
         prompt_list = [get_job_prompt(job_name, date) for job_name in train_list] + [get_job_prompt(job_name, date) for job_name in test_list]
     elif date in ["2023-10-12", "2023-10-26", "2023-11-03", "2023-11-05"]: # 40 jobs, gender-agnostic
         prompt_list = [get_job_prompt(job_name, date) for job_name in social_job_list]
-    elif date == "2023-10-15" or date == "2023-10-29": # 40 jobs, extended prompts
+    elif date in ["2023-10-15", "2023-10-29", "2023-11-06"]: # 40 jobs, extended prompts
         prompt_list = [get_job_prompt(job_name, date, "male") for job_name in social_job_list] + [get_job_prompt(job_name, date, "female") for job_name in social_job_list]
     elif date == "2023-10-30" or date == "2023-10-31":
         prompt_list = [get_generic_prompt(date)] + [get_generic_prompt(date, "male")] + [get_generic_prompt(date, "female")]
     elif date == "2023-11-01" or date == "2023-11-02":
         prompt_list = [get_generic_prompt(date)] + [get_generic_prompt(date, "male")] + [get_generic_prompt(date, "female")]
+    elif date == "2023-11-07":
+        prompt_list = get_engineer_prompt(date)
 
     if num_divide > 1:
         unit_divide = len(prompt_list) // num_divide
